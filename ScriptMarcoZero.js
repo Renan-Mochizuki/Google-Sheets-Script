@@ -1,9 +1,11 @@
 //Seleciona a planilha de Confirmação de Interesse e a aba
-const planilhaInteresse = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1TztdPoYhZ6t_ExftBE3gtugVyPSKRDx0IPLZTAJNmlI/edit?gid=320866237#gid=320866237");
+const urlInteresse = "*";
+const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
 const abaInteresse = planilhaInteresse.getSheetByName("Respostas ao formulário 1");
 
 //Seleciona a planilha do Marco Zero e a aba
-const planilhaMarcoZero = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1--p65M1CNQlUz1vCLWovFWWqflwZVvTnMCeWm5mj3Gs/edit?gid=861556083#gid=861556083");
+const urlMarcoZero = "*"
+const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
 const abaMarcoZero = planilhaMarcoZero.getSheetByName("Respostas ao formulário 1");
 
 //Captura as últimas linhas
