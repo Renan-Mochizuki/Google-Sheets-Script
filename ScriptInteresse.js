@@ -1,10 +1,14 @@
+// Função para adicionar o menu
 function onOpen(e) {
-	// Add a custom menu to the spreadsheet.
-	SpreadsheetApp.getUi() // Or DocumentApp, SlidesApp, or FormApp.
-		.createMenu('Custom Menu')
-		.addItem('First item', 'menuItem1')
+	SpreadsheetApp.getUi()
+		.createMenu('Menu de Funções')
+		.addItem('Verificar se respondeu o Marco Zero', 'VerificarMarcoZero')
+		.addItem('Importar campos do Whatsapp preenchidos', 'ImportarEntrouWhats')
+		.addItem('Enviar Marco Zero por Email', 'EnviarMarcoZero')
 		.addToUi();
 }
+
+onOpen();
 
 //Seleciona a planilha de Confirmação de Interesse e a aba
 const urlInteresse = "*";
@@ -26,6 +30,8 @@ const colEmail = 3;
 const colTel = 4;
 const colRespondeuMarcoZero = 14;
 const colFormularioEnviado = 16;
+const colEntrouWhats = 13;
+const colCadastradoWhatsMarcoZero = 14;
 
 //Função para enviar o formulário do Marco Zero
 function EnviarMarcoZero() { //Estamos na planilha de Confirmação de Interesse
@@ -52,13 +58,13 @@ function EnviarMarcoZero() { //Estamos na planilha de Confirmação de Interesse
 	}
 }
 
-// Função que verificará se o email existe
-function VerificarExistencia(emailInteresse) {
+// Função que verificará se o email existe na planilha Marco Zero e retornará a linha
+const RetornarLinhaEmail = (emailInteresse) => {
 	//Conferir todos os emails da planilha Marco Zero
-	for (let j = 2; j <= ultimaLinhaMarcoZero; j++) {
-		const emailMarcoZero = abaMarcoZero.getRange(j, colEmail).getValue();
+	for (let i = 2; i <= ultimaLinhaMarcoZero; i++) {
+		const emailMarcoZero = abaMarcoZero.getRange(i, colEmail).getValue();
 
-		if (emailInteresse == emailMarcoZero) return true;
+		if (emailInteresse == emailMarcoZero) return i;
 	}
 	// Se não for encontrado nenhum 
 	return false;
@@ -70,6 +76,7 @@ function VerificarMarcoZero() {
 	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
 		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
 		const celRespondeuMarcoZero = abaInteresse.getRange(i, colRespondeuMarcoZero);
+		const valRespondeuMarcoZero = celRespondeuMarcoZero.getValue();
 
 		// Se o campo estiver vazio, limpe a célula e passe para o próximo
 		if (!emailInteresse) {
@@ -77,23 +84,36 @@ function VerificarMarcoZero() {
 			continue;
 		}
 
-		if (VerificarExistencia(emailInteresse))
+		// Se o campo já estiver marcado com sim
+		if (valRespondeuMarcoZero == "SIM") continue;
+
+		if (RetornarLinhaEmail(emailInteresse))
 			celRespondeuMarcoZero.setValue("SIM");
 		else
 			celRespondeuMarcoZero.setValue("NÃO");
 	}
 }
 
-/*
-function onOpen(e){
-  let ambiente = SpreadsheetApp.getUi();
-  ambiente.createMenu("Ações")
-	 .addItem("Enviar Marco Zero", "enviarMarcoZero")
-	 .addToUi();
-  
-  SpreadsheetApp.getUi() // Or DocumentApp, SlidesApp, or FormApp.
-		.createMenu('Custom Menu')
-		.addItem('First item', 'menuItem1')
-		.addToUi();
+// Função que pegará quem entrou no whatsapp pela planilha de interesse e colocará nessa planilha
+function ImportarEntrouWhats() {
+	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
+		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
+		const celEntrouWhats = abaInteresse.getRange(i, colEntrouWhats);
+
+		// Se o campo estiver vazio, passe para o próximo
+		if (!emailInteresse)
+			continue;
+
+		const linhaEmailEncontradoMarcoZero = RetornarLinhaEmail(emailInteresse);
+
+		if (linhaEmailEncontradoMarcoZero) {
+			const celCadastradoWhatsMarcoZero = abaMarcoZero.getRange(linhaEmailEncontradoMarcoZero, colCadastradoWhatsMarcoZero);
+			const valCadastradoWhatsMarcoZero = celCadastradoWhatsMarcoZero.getValue();
+
+			if (valCadastradoWhatsMarcoZero == "SIM")
+				celEntrouWhats.setValue("SIM");
+			else if (valCadastradoWhatsMarcoZero == "NÃO")
+				celEntrouWhats.setValue("NÃO");
+		}
+	}
 }
-*/
