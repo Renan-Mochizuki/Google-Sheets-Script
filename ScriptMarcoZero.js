@@ -2,7 +2,7 @@
 function onOpen(e) {
 	SpreadsheetApp.getUi()
 		.createMenu('Menu de Funções')
-		.addItem('Verificar se está cadastrada na planilha de interesse', 'VerificarInteresse')
+		.addItem('Verificar quem está cadastrado na planilha de interesse', 'VerificarInteresse')
 		.addItem('Sincronizar campos WhatsApp preenchidos', 'ImportarEntrouWhats')
 		.addToUi();
 }
@@ -24,9 +24,9 @@ const ultimaLinhaInteresse = abaInteresse.getLastRow();
 const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
 
 // Colunas A,B,C,D...
-const colNome = 2;
-const colEmail = 3;
-const colTel = 4;
+const colNome = 3;
+const colEmail = 4;
+const colTel = 5;
 const colEstaNaInteresse = 13;
 const colWhatsMarcoZero = 14;
 const colWhatsInteresse = 13;
@@ -57,8 +57,8 @@ function VerificarInteresse() {
 			continue;
 		}
 
-		// Se o campo já estiver marcado com sim ou sessão pública
-		if (valEstaNaInteresse == "SIM" || valEstaNaInteresse == "S. PÚBLICA") continue;
+		// Se o campo já estiver marcado passe para o próximo
+		if (valEstaNaInteresse) continue;
 
 		if (RetornarLinhaEmail(emailMarcoZero))
 			celEstaNaInteresse.setValue("SIM");
@@ -75,7 +75,7 @@ function ImportarEntrouWhats() {
 		const valWhatsMarcoZero = celWhatsMarcoZero.getValue();
 
 		// Se o campo estiver vazio, passe para o próximo
-		if (!emailInteresse)
+		if (!emailMarcoZero)
 			continue;
 
 		const linhaCampoMarcoZero = RetornarLinhaEmail(emailMarcoZero);

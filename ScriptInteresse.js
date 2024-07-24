@@ -2,9 +2,9 @@
 function onOpen(e) {
 	SpreadsheetApp.getUi()
 		.createMenu('Menu de Funções')
-		.addItem('Verificar se respondeu o Marco Zero', 'VerificarMarcoZero')
+		.addItem('Verificar quem respondeu o Marco Zero', 'VerificarMarcoZero')
 		.addItem('Sincronizar campos WhatsApp preenchidos', 'ImportarEntrouWhats')
-		.addItem('Enviar Marco Zero por Email', 'EnviarMarcoZero')
+		.addItem('Enviar emails do Marco Zero restantes', 'EnviarMarcoZero')
 		.addToUi();
 }
 
@@ -25,9 +25,9 @@ const ultimaLinhaInteresse = abaInteresse.getLastRow();
 const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
 
 // Colunas A,B,C,D...
-const colNome = 2;
-const colEmail = 3;
-const colTel = 4;
+const colNome = 3;
+const colEmail = 4;
+const colTel = 5;
 const colRespondeuMarcoZero = 14;
 const colFormularioEnviado = 16;
 const colWhatsInteresse = 13;
@@ -94,7 +94,7 @@ function VerificarMarcoZero() {
 	}
 }
 
-// Função que pegará quem entrou no whatsapp pela planilha de interesse e colocará nessa planilha
+// Função que pegará quem entrou no whatsapp pela planilha do marco zero e colocará nessa planilha
 function ImportarEntrouWhats() {
 	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
 		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
