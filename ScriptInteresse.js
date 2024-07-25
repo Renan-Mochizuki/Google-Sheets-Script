@@ -16,7 +16,7 @@ const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
 const abaInteresse = planilhaInteresse.getSheetByName("Respostas ao formulário 1");
 
 //Seleciona a planilha do Marco Zero e a aba
-const urlMarcoZero = "*"
+const urlMarcoZero = "*";
 const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
 const abaMarcoZero = planilhaMarcoZero.getSheetByName("Respostas ao formulário 1");
 
@@ -75,6 +75,7 @@ function VerificarMarcoZero() {
 	//Pegar o email na planilha Interesse
 	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
 		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
+		const celEnviadoMarcoZero = abaInteresse.getRange(i, colFormularioEnviado);
 		const celRespondeuMarcoZero = abaInteresse.getRange(i, colRespondeuMarcoZero);
 		const valRespondeuMarcoZero = celRespondeuMarcoZero.getValue();
 
@@ -87,10 +88,13 @@ function VerificarMarcoZero() {
 		// Se o campo já estiver marcado com sim
 		if (valRespondeuMarcoZero == "SIM") continue;
 
-		if (RetornarLinhaEmail(emailInteresse))
+		if (RetornarLinhaEmail(emailInteresse)) {
 			celRespondeuMarcoZero.setValue("SIM");
-		else
+			celEnviadoMarcoZero.setValue("SIM");
+		}
+		else{
 			celRespondeuMarcoZero.setValue("NÃO");
+		}
 	}
 }
 

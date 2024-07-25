@@ -3,6 +3,7 @@ function onOpen(e) {
 	SpreadsheetApp.getUi()
 		.createMenu('Menu de Funções')
 		.addItem('Importar Dados', 'ImportarDados')
+		.addItem('LIMPAR TODOS CAMPOS menos o luiz', 'LimparTemporario')
 		.addToUi();
 }
 
@@ -29,30 +30,32 @@ const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
 const ultimalinhaGerencial = abaGerencial.getLastRow();
 
 // Colunas gerais
+const colData = 1;
 const colNome = 3;
 const colEmail = 4;
 const colTel = 5;
 const colConfirmacaoTel = 6;
 // Colunas planilha Interesse
+const colDataNascInteresse = 7;
 const colCidadeInteresse = 8;
 const colEstadoInteresse = 9;
 const colWhatsInteresse = 13;
 const colRespondeuMarcoZeroInteresse = 14;
 const colSituacaoInteresse = 15;
 const colFormEnviadoInteresse = 16;
-const colDataNascInteresse = 7;
 // Colunas planilha Marco Zero
 const colRespondeuInteresseMarcoZero = 13;
 const colWhatsMarcoZero = 14;
 // Colunas planilha Gerencial
+const colDataInteresseGerencial = 1;
+const colDataMarcoZeroGerencial = 2;
+const colCidadeGerencial = 6;
+const colEstadoGerencial = 7;
 const colWhatsGerencial = 8;
 const colRespondeuInteresseGerencial = 9;
 const colRespondeuMarcoZeroGerencial = 10;
 const colSituacaoGerencial = 11;
 const colFormEnviadoGerencial = 12;
-const colDataNascGerencial = 2;
-const colCidadeGerencial = 6;
-const colEstadoGerencial = 6;
 
 //Função para verificar se o email já existe no Gerencial.
 function VerRepeticao(emailVerificar) {
@@ -97,18 +100,22 @@ function ImportarDados() {
 	// Loop da planilha interesse
 	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
 		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
+
+		// Se não existir email, passe para o próximo
+		if (!emailInteresse) continue;
+
 		const linhaCampoGerencial = RetornarLinhaEmailGerencial(emailInteresse);
 
 		// Se aquele email ainda não estiver registrado na planilha gerencial
 		if (!linhaCampoGerencial) {
 			// Pegando os campos data e hora, nome, email, telefone, cidade e estado
-			const dataHoraInteresse = abaInteresse.getRange(i, 1).getValue();
+			const dataHoraInteresse = abaInteresse.getRange(i, colData).getValue();
 			const intervaloInteresse = abaInteresse.getRange(i, colNome, 1, 3).getValues();
 			const intervaloCidadeInteresse = abaInteresse.getRange(i, colCidadeInteresse, 1, 2).getValues();
 
 			// Inserindo os campos na planilha gerencial
 			abaGerencial.getRange(linhaVazia, colNome, 1, 3).setValues(intervaloInteresse);
-			abaGerencial.getRange(linhaVazia, 1).setValue(dataHoraInteresse);
+			abaGerencial.getRange(linhaVazia, colDataInteresseGerencial).setValue(dataHoraInteresse);
 			abaGerencial.getRange(linhaVazia, colCidadeGerencial, 1, 2).setValues(intervaloCidadeInteresse);
 
 			AtualizarCamposAdicionaisInteresse(i, linhaVazia);
@@ -128,34 +135,54 @@ function ImportarDados() {
 
 	// Loop da planilha marco zero
 	for (let i = 2; i <= ultimaLinhaMarcoZero; i++) {
-		const respondeuInteresseMarcoZero = abaMarcoZero.getRange(i, colRespondeuInteresseMarcoZero).getValue();
+		const emailMarcoZero = abaMarcoZero.getRange(i, colEmail).getValue();
 
-		// Apenas faça algo se aquela pessoa não estiver na planilha de interesse
+		// Se não existir email, passe para o próximo
+		if (!emailMarcoZero) continue;
+
+		const respondeuInteresseMarcoZero = abaMarcoZero.getRange(i, colRespondeuInteresseMarcoZero).getValue();
+		const dataHoraMarcoZero = abaMarcoZero.getRange(i, colData).getValue();
+		const linhaCampoGerencial = RetornarLinhaEmailGerencial(emailMarcoZero);
+
+		// Se aquela pessoa não estiver na planilha de interesse
 		if (respondeuInteresseMarcoZero != "SIM") {
-			const emailMarcoZero = abaMarcoZero.getRange(i, colEmail).getValue();
-			const linhaCampoGerencial = RetornarLinhaEmailGerencial(emailMarcoZero);
 
 			// Se aquele email ainda não estiver registrado na planilha gerencial
 			if (!linhaCampoGerencial) {
+
 				// Pegando os campos data e hora, nome, email, telefone e whats
-				const dataHoraMarcoZero = abaMarcoZero.getRange(i, 1).getValue();
 				const intervaloMarcoZero = abaMarcoZero.getRange(i, colNome, 1, 3).getValues();
 				const whatsMarcoZero = abaMarcoZero.getRange(i, colWhatsMarcoZero).getValue();
 
 				// Inserindo os campos na planilha gerencial
-				abaGerencial.getRange(linhaVazia, 1).setValue(dataHoraMarcoZero);
+				abaGerencial.getRange(linhaVazia, colDataMarcoZeroGerencial).setValue(dataHoraMarcoZero);
 				abaGerencial.getRange(linhaVazia, colNome, 1, 3).setValues(intervaloMarcoZero);
 				abaGerencial.getRange(linhaVazia, colRespondeuMarcoZeroGerencial).setValue("SIM");
 				abaGerencial.getRange(linhaVazia, colFormEnviadoGerencial).setValue("SIM");
 				abaGerencial.getRange(linhaVazia, colWhatsGerencial).setValue(whatsMarcoZero);
 				abaGerencial.getRange(linhaVazia, colRespondeuInteresseGerencial).setValue(respondeuInteresseMarcoZero);
+
+				// Pintando campos
+				abaGerencial.getRange(linhaVazia, colDataInteresseGerencial).setBackground("#eeeeee");
+				abaGerencial.getRange(linhaVazia, colCidadeGerencial).setBackground("#eeeeee");
+
+				// Atualizando a nova linha vazia
+				linhaVazia = RetornarEspacoVazio();
 				continue;
 			}
+
 			// Se o email já estiver registrado na planilha gerencial
 			const whatsMarcoZero = abaMarcoZero.getRange(i, colWhatsMarcoZero).getValue();
 			abaGerencial.getRange(linhaCampoGerencial, colWhatsGerencial).setValue(whatsMarcoZero);
 			abaGerencial.getRange(linhaCampoGerencial, colRespondeuInteresseGerencial).setValue(respondeuInteresseMarcoZero);
+			continue;
 		}
+
+		// Se a pessoa estiver na planilha de interesse
+
+		// Por algum motivo essa dataHoraMarcaZero retorna o seguinte erro:
+		// Exception: A coluna inicial do intervalo é muito pequena
+		// abaGerencial.getRange(linhaCampoGerencial, colDataMarcoZeroGerencial).setValue(dataHoraMarcoZero);
 	}
 }
 
@@ -190,6 +217,7 @@ const VerificarMarcoZeroInteresse = () => {
 	//Pegar o email na planilha Interesse
 	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
 		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
+		const celEnviadoMarcoZero = abaInteresse.getRange(i, colFormEnviadoInteresse);
 		const celRespondeuMarcoZero = abaInteresse.getRange(i, colRespondeuMarcoZeroInteresse);
 		const valRespondeuMarcoZero = celRespondeuMarcoZero.getValue();
 
@@ -202,10 +230,12 @@ const VerificarMarcoZeroInteresse = () => {
 		// Se o campo já estiver marcado com sim
 		if (valRespondeuMarcoZero == "SIM") continue;
 
-		if (RetornarLinhaEmailMarcoZero(emailInteresse))
+		if (RetornarLinhaEmailMarcoZero(emailInteresse)) {
 			celRespondeuMarcoZero.setValue("SIM");
-		else
+			celEnviadoMarcoZero.setValue("SIM");
+		} else {
 			celRespondeuMarcoZero.setValue("NÃO");
+		}
 	}
 }
 
@@ -275,5 +305,16 @@ function VerificarInteresseMarcoZero() {
 			celEstaNaInteresse.setValue("SIM");
 		else
 			celEstaNaInteresse.setValue("S. PÚBLICA");
+	}
+}
+
+
+function LimparTemporario() {
+	for (let i = 3; i <= ultimalinhaGerencial; i++) {
+		for (let j = 1; j <= 12; j++) {
+			const celula = abaGerencial.getRange(i, j)
+			celula.setValue('');
+			celula.setBackground('#ffffff');
+		}
 	}
 }

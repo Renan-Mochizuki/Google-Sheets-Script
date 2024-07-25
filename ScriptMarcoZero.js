@@ -15,7 +15,7 @@ const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
 const abaInteresse = planilhaInteresse.getSheetByName("Respostas ao formulário 1");
 
 //Seleciona a planilha do Marco Zero e a aba
-const urlMarcoZero = "*"
+const urlMarcoZero = "*";
 const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
 const abaMarcoZero = planilhaMarcoZero.getSheetByName("Respostas ao formulário 1");
 
