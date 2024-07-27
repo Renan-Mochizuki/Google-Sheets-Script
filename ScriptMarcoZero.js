@@ -3,7 +3,7 @@ function onOpen(e) {
 	SpreadsheetApp.getUi()
 		.createMenu('Menu de Funções')
 		.addItem('Verificar quem está cadastrado na planilha de interesse', 'VerificarInteresse')
-		.addItem('Sincronizar campos WhatsApp preenchidos', 'ImportarEntrouWhats')
+		.addItem('Sincronizar campos do WhatsApp', 'SincronizarWhats')
 		.addToUi();
 }
 
@@ -67,35 +67,41 @@ function VerificarInteresse() {
 	}
 }
 
-// Função que pegará quem entrou no whatsapp pela planilha de interesse e colocará nessa planilha
-function ImportarEntrouWhats() {
-	for (let i = 2; i <= ultimaLinhaMarcoZero; i++) {
-		const emailMarcoZero = abaMarcoZero.getRange(i, colEmail).getValue();
-		const celWhatsMarcoZero = abaMarcoZero.getRange(i, colWhatsMarcoZero);
-		const valWhatsMarcoZero = celWhatsMarcoZero.getValue();
+// Função que sincronizará quem entrou no whatsapp entre as duas planilhas
+function SincronizarWhats() {
+	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
+		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
+		const celWhatsInteresse = abaInteresse.getRange(i, colWhatsInteresse);
+		const valWhatsInteresse = celWhatsInteresse.getValue();
 
 		// Se o campo estiver vazio, passe para o próximo
-		if (!emailMarcoZero)
+		if (!emailInteresse)
 			continue;
 
-		const linhaCampoMarcoZero = RetornarLinhaEmail(emailMarcoZero);
+		const linhaCampoMarcoZero = RetornarLinhaEmail(emailInteresse);
 
-		// Se o email for encontrado na outra planilha
+		// Se o email for encontrado no Marco Zero
 		if (linhaCampoMarcoZero) {
-			const celWhatsInteresse = abaInteresse.getRange(linhaCampoMarcoZero, colWhatsInteresse);
-			const valWhatsInteresse = celWhatsInteresse.getValue();
+			const celWhatsMarcoZero = abaMarcoZero.getRange(linhaCampoMarcoZero, colWhatsMarcoZero);
+			const valWhatsMarcoZero = celWhatsMarcoZero.getValue();
 
-			// Se o campo dessa planilha estiver como sim e da outra como não, altere o campo da outra planilha
-			if (valWhatsMarcoZero == "SIM" && valWhatsInteresse == "NÃO") {
-				celWhatsInteresse.setValue("SIM");
+			// Se o campo do Marco Zero estiver vazio, altere o campo do Marco Zero com o valor do Interesse
+			if (!valWhatsMarcoZero) {
+				celWhatsMarcoZero.setValue(valWhatsInteresse);
 				continue;
 			}
 
-			// Se o campo da outra planilha estiver como sim ou não especificamente, altere o campo dessa planilha
-			if (valWhatsInteresse == "SIM")
+			// Se o campo do Interesse estiver como sim e da outra como não, altere o campo do Marco Zero
+			if (valWhatsInteresse == "SIM" && valWhatsMarcoZero == "NÃO") {
 				celWhatsMarcoZero.setValue("SIM");
-			else if (valWhatsInteresse == "NÃO")
-				celWhatsMarcoZero.setValue("NÃO");
+				continue;
+			}
+
+			// Se o campo do Marco Zero estiver como sim ou não (especificamente), altere o campo do Interesse
+			if (valWhatsMarcoZero == "SIM")
+				celWhatsInteresse.setValue("SIM");
+			else if (valWhatsMarcoZero == "NÃO")
+				celWhatsInteresse.setValue("NÃO");
 		}
 	}
 }

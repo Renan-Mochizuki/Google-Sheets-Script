@@ -3,7 +3,9 @@ function onOpen(e) {
 	SpreadsheetApp.getUi()
 		.createMenu('Menu de Funções')
 		.addItem('Importar Dados', 'ImportarDados')
-		.addItem('LIMPAR TODOS CAMPOS menos o luiz', 'LimparTemporario')
+		.addItem('Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
+		.addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
+		.addItem('Excluir todos os campos', 'LimparCampos')
 		.addToUi();
 }
 
@@ -15,7 +17,7 @@ const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
 const abaInteresse = planilhaInteresse.getSheetByName("Respostas ao formulário 1");
 
 //Seleciona a planilha do Marco Zero e a aba
-const urlMarcoZero = "*"
+const urlMarcoZero = "*";
 const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
 const abaMarcoZero = planilhaMarcoZero.getSheetByName("Respostas ao formulário 1");
 
@@ -28,6 +30,7 @@ const abaGerencial = planilhaGerencial.getSheetByName("Gerencial");
 const ultimaLinhaInteresse = abaInteresse.getLastRow();
 const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
 const ultimalinhaGerencial = abaGerencial.getLastRow();
+const ultimaColunaGerencial = abaGerencial.getLastColumn();
 
 // Colunas gerais
 const colData = 1;
@@ -94,7 +97,7 @@ function RetornarEspacoVazio() {
 function ImportarDados() {
 	let linhaVazia = RetornarEspacoVazio();
 
-	SincronizarWhatsInteresse();
+	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
 	VerificarMarcoZeroInteresse()
 
 	// Loop da planilha interesse
@@ -199,122 +202,88 @@ const AtualizarCamposAdicionaisInteresse = (linhaInteresse, linhaInserir) => {
 	abaGerencial.getRange(linhaInserir, colFormEnviadoGerencial).setValue(formEnviadoInteresse);
 }
 
-
-// Função que verificará se o email existe na planilha Marco Zero e retornará a linha
-const RetornarLinhaEmailMarcoZero = (emailInteresse) => {
-	//Conferir todos os emails da planilha Marco Zero
-	for (let i = 2; i <= ultimaLinhaMarcoZero; i++) {
-		const emailMarcoZero = abaMarcoZero.getRange(i, colEmail).getValue();
-
-		if (emailInteresse == emailMarcoZero) return i;
-	}
-	// Se não for encontrado nenhum 
-	return false;
+// Função que sincronizará quem entrou no whatsapp entre as três planilhas
+function SincronizarWhatsGerencial() {
+	// Sincronize as planilhas Interesse e Marco Zero, depois as planilhas Interesse e Gerencial e por fim, Interesse e Marco Zero de novo
+	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
+	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsGerencial, abaGerencial);
+	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
 }
 
-//Função para verificar quem respondeu o Marco Zero
-const VerificarMarcoZeroInteresse = () => {
-	//Pegar o email na planilha Interesse
-	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
-		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
-		const celEnviadoMarcoZero = abaInteresse.getRange(i, colFormEnviadoInteresse);
-		const celRespondeuMarcoZero = abaInteresse.getRange(i, colRespondeuMarcoZeroInteresse);
-		const valRespondeuMarcoZero = celRespondeuMarcoZero.getValue();
-
-		// Se o campo estiver vazio, limpe a célula e passe para o próximo
-		if (!emailInteresse) {
-			celRespondeuMarcoZero.setValue("");
-			continue;
-		}
-
-		// Se o campo já estiver marcado com sim
-		if (valRespondeuMarcoZero == "SIM") continue;
-
-		if (RetornarLinhaEmailMarcoZero(emailInteresse)) {
-			celRespondeuMarcoZero.setValue("SIM");
-			celEnviadoMarcoZero.setValue("SIM");
-		} else {
-			celRespondeuMarcoZero.setValue("NÃO");
+// Função para limpar toda a planilha
+function LimparCampos() {
+	// Loop das linhas
+	for (let i = 2; i <= ultimalinhaGerencial; i++) {
+		// Loop das colunas
+		for (let j = 1; j <= ultimaColunaGerencial; j++) {
+			const celula = abaGerencial.getRange(i, j)
+			celula.setValue('');
+			celula.setBackground('#ffffff');
 		}
 	}
 }
 
-// Função que sincroniza os campos do whats do marco zero para a planilha interesse
-const SincronizarWhatsInteresse = () => {
+// Função que completa todos os campos vazios adicionais com NÃO
+function CompletarVaziosComNao() {
+	// Loop das colunas
+	for (let j = colWhatsGerencial; j <= ultimaColunaGerencial; j++) {
+
+		// Se a coluna for a de situação, pule
+		if(j == colSituacaoGerencial) continue;
+
+		// Loop das linhas
+		for (let i = 2; i <= ultimalinhaGerencial; i++) {
+			const celula = abaGerencial.getRange(i, j)
+			const valor = celula.getValue();
+			if (!valor) celula.setValue("NÃO");
+		}
+	}
+}
+
+// Função que sincronizará um dado campo entre as planilhas Interesse e uma outra desejada, caso não for informada,
+// A outra planilha será o Marco Zero
+function SincronizarCampoPlanilhas(colInteresseDesejada, colPlanilhaDesejada, abaDesejada) {
 	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
 		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
-		const celWhatsInteresse = abaInteresse.getRange(i, colWhatsInteresse);
-		const valWhatsInteresse = celWhatsInteresse.getValue();
 
 		// Se o campo estiver vazio, passe para o próximo
 		if (!emailInteresse)
 			continue;
 
-		const linhaCampoMarcoZero = RetornarLinhaEmailMarcoZero(emailInteresse);
+		// Se a aba desejada for a gerencial, use a função da gerencial, se não, use a função do marco zero
+		const linhaCampoPlanilhaDesejada = abaDesejada == abaGerencial ? RetornarLinhaEmailGerencial(emailInteresse) : RetornarLinhaEmailMarcoZero(emailInteresse);
+		const abaPlanilhaDesejada = abaDesejada == abaGerencial ? abaGerencial : abaMarcoZero;
 
 		// Se o email for encontrado na outra planilha
-		if (linhaCampoMarcoZero) {
-			const celWhatsMarcoZero = abaMarcoZero.getRange(linhaCampoMarcoZero, colWhatsMarcoZero);
-			const valWhatsMarcoZero = celWhatsMarcoZero.getValue();
+		if (linhaCampoPlanilhaDesejada) {
+			const celInteresse = abaInteresse.getRange(i, colInteresseDesejada);
+			const valInteresse = celInteresse.getValue();
+			const celPlanilhaDesejada = abaPlanilhaDesejada.getRange(linhaCampoPlanilhaDesejada, colPlanilhaDesejada);
+			const valPlanilhaDesejada = celPlanilhaDesejada.getValue();
 
-			// Se o campo dessa planilha estiver como sim e da outra como não, altere o campo da outra planilha
-			if (valWhatsInteresse == "SIM" && valWhatsMarcoZero == "NÃO") {
-				celWhatsMarcoZero.setValue("SIM");
+			// Se o campo do Interesse estiver vazio, altere o campo do Interesse com o valor da outra planilha
+			if (!valInteresse) {
+				celInteresse.setValue(valPlanilhaDesejada);
 				continue;
 			}
 
-			// Se o campo da outra planilha estiver como sim ou não especificamente, altere o campo dessa planilha
-			if (valWhatsMarcoZero == "SIM")
-				celWhatsInteresse.setValue("SIM");
-			else if (valWhatsMarcoZero == "NÃO")
-				celWhatsInteresse.setValue("NÃO");
-		}
-	}
-}
+			// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Interesse
+			if (!valPlanilhaDesejada) {
+				celPlanilhaDesejada.setValue(valInteresse);
+				continue;
+			}
 
-// Função que verificará se o email existe na planilha Interesse e retornará a linha
-const RetornarLinhaEmailInteresse = (emailMarcoZero) => {
-	//Conferir todos os emails da planilha Interesse
-	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
-		const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
+			// Se o campo do Interesse estiver como sim e da outra como não, altere o campo da outra planilha
+			if (valInteresse == "SIM" && valPlanilhaDesejada == "NÃO") {
+				celPlanilhaDesejada.setValue("SIM");
+				continue;
+			}
 
-		if (emailMarcoZero == emailInteresse) return i;
-	}
-	// Se não for encontrado nenhum 
-	return false;
-}
-
-//Função para verificar se a pessoa está cadastrada na planilha de Interesse
-function VerificarInteresseMarcoZero() {
-	//Pegar o email na planilha Marco Zero
-	for (let i = 2; i <= ultimaLinhaMarcoZero; i++) {
-		const emailMarcoZero = abaMarcoZero.getRange(i, colEmail).getValue();
-		const celEstaNaInteresse = abaMarcoZero.getRange(i, colRespondeuInteresseMarcoZero);
-		const valEstaNaInteresse = celEstaNaInteresse.getValue();
-
-		// Se o campo estiver vazio, limpe a célula e passe para o próximo
-		if (!emailMarcoZero) {
-			celEstaNaInteresse.setValue("");
-			continue;
-		}
-
-		// Se o campo já estiver marcado passe para o próximo
-		if (valEstaNaInteresse) continue;
-
-		if (RetornarLinhaEmailInteresse(emailMarcoZero))
-			celEstaNaInteresse.setValue("SIM");
-		else
-			celEstaNaInteresse.setValue("S. PÚBLICA");
-	}
-}
-
-
-function LimparTemporario() {
-	for (let i = 3; i <= ultimalinhaGerencial; i++) {
-		for (let j = 1; j <= 12; j++) {
-			const celula = abaGerencial.getRange(i, j)
-			celula.setValue('');
-			celula.setBackground('#ffffff');
+			// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Interesse
+			if (valPlanilhaDesejada == "SIM" && valInteresse == "NÃO") {
+				celInteresse.setValue("SIM");
+				continue;
+			}
 		}
 	}
 }
