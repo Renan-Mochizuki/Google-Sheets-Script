@@ -6,6 +6,7 @@ function onOpen(e) {
 		.addItem('Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
 		.addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
 		.addItem('Excluir todos os campos', 'LimparCampos')
+		.addItem('Criar contatos', 'CriaContatos')
 		.addToUi();
 }
 
@@ -60,17 +61,6 @@ const colRespondeuMarcoZeroGerencial = 10;
 const colSituacaoGerencial = 11;
 const colFormEnviadoGerencial = 12;
 
-//Função para verificar se o email já existe no Gerencial.
-function VerRepeticao(emailVerificar) {
-	let i = 2;
-	do {
-		const emailGerencial = abaGerencial.getRange(i, colEmail).getValue();
-		if (emailVerificar == emailGerencial) return false; //Já existe esse email no Gerencial.
-		i++;
-	} while (i <= ultimalinhaGerencial)
-	return true; //Não existe esse email no Gerenciameto.
-}
-
 // Função que verificará se o email existe na planilha Gerencial e retornará a linha
 const RetornarLinhaEmailGerencial = (emailInformado) => {
 	//Conferir todos os emails da planilha Gerencial
@@ -83,7 +73,7 @@ const RetornarLinhaEmailGerencial = (emailInformado) => {
 	return false;
 }
 
-//Retorna a linha em que o campo do email está vazio
+// Retorna a linha em que o campo do email está vazio
 function RetornarEspacoVazio() {
 	let i = 2;
 	do {
@@ -93,12 +83,10 @@ function RetornarEspacoVazio() {
 	} while (i != 0)
 }
 
-// Função que importa dados da planilha interesse e do marco zero que não estão na de interesse
-function ImportarDados() {
+// Função que importa todos os campos da planilha de interesse
+function ImportarDadosInteresse() {
+	// Pegando a próxima linha vazia da planilha
 	let linhaVazia = RetornarEspacoVazio();
-
-	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
-	VerificarMarcoZeroInteresse()
 
 	// Loop da planilha interesse
 	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
@@ -120,21 +108,45 @@ function ImportarDados() {
 			abaGerencial.getRange(linhaVazia, colNome, 1, 3).setValues(intervaloInteresse);
 			abaGerencial.getRange(linhaVazia, colDataInteresseGerencial).setValue(dataHoraInteresse);
 			abaGerencial.getRange(linhaVazia, colCidadeGerencial, 1, 2).setValues(intervaloCidadeInteresse);
+			abaGerencial.getRange(linhaVazia, colRespondeuInteresseGerencial).setValue("SIM");
 
 			AtualizarCamposAdicionaisInteresse(i, linhaVazia);
-
-			// Marcando a coluna respondeu interesse da gerencial como sim
-			abaGerencial.getRange(linhaVazia, colRespondeuInteresseGerencial).setValue("SIM");
 
 			// Atualizando a nova linha vazia
 			linhaVazia = RetornarEspacoVazio();
 			continue;
 		}
+
 		// Se o email já estiver registrado na planilha gerencial
 		AtualizarCamposAdicionaisInteresse(i, linhaCampoGerencial);
 	}
+}
 
-	VerificarInteresseMarcoZero();
+// Função que atualizará os campos adicionais da planilha gerencial a partir da planilha de interesse
+const AtualizarCamposAdicionaisInteresse = (linhaInteresse, linhaInserir) => {
+	const whatsInteresse = abaInteresse.getRange(linhaInteresse, colWhatsInteresse).getValue();
+	const respMarcoZero = abaInteresse.getRange(linhaInteresse, colRespondeuMarcoZeroInteresse).getValue();
+	const situacaoInteresse = abaInteresse.getRange(linhaInteresse, colSituacaoInteresse).getValue();
+	const formEnviadoInteresse = abaInteresse.getRange(linhaInteresse, colFormEnviadoInteresse).getValue();
+
+	abaGerencial.getRange(linhaInserir, colWhatsGerencial).setValue(whatsInteresse);
+	abaGerencial.getRange(linhaInserir, colRespondeuMarcoZeroGerencial).setValue(respMarcoZero);
+	abaGerencial.getRange(linhaInserir, colSituacaoGerencial).setValue(situacaoInteresse);
+	abaGerencial.getRange(linhaInserir, colFormEnviadoGerencial).setValue(formEnviadoInteresse);
+
+	// Se a pessoa tiver respondido o marco zero, pegue a data da resposta e insira
+	if (respMarcoZero == 'SIM') {
+		const emailInteresse = abaInteresse.getRange(linhaInteresse, colEmail).getValue();
+		const linhaCampoMarcoZero = RetornarLinhaEmailMarcoZero(emailInteresse);
+		const dataHoraMarcoZero = abaMarcoZero.getRange(linhaCampoMarcoZero, colData).getValue();
+		abaGerencial.getRange(linhaInserir, colDataMarcoZeroGerencial).setValue(dataHoraMarcoZero);
+	}
+}
+
+// Função que importa os campos do marco zero que não estão na planilha de interesse
+function ImportarDadosMarcoZero() {
+	// Pegando a próxima linha vazia da planilha
+	let linhaVazia = RetornarEspacoVazio();
 
 	// Loop da planilha marco zero
 	for (let i = 2; i <= ultimaLinhaMarcoZero; i++) {
@@ -143,8 +155,8 @@ function ImportarDados() {
 		// Se não existir email, passe para o próximo
 		if (!emailMarcoZero) continue;
 
+		// Pegando o campo se está cadastrada na planilha de interesse e pegando a linha desse email na planilha gerencial
 		const respondeuInteresseMarcoZero = abaMarcoZero.getRange(i, colRespondeuInteresseMarcoZero).getValue();
-		const dataHoraMarcoZero = abaMarcoZero.getRange(i, colData).getValue();
 		const linhaCampoGerencial = RetornarLinhaEmailGerencial(emailMarcoZero);
 
 		// Se aquela pessoa não estiver na planilha de interesse
@@ -154,6 +166,7 @@ function ImportarDados() {
 			if (!linhaCampoGerencial) {
 
 				// Pegando os campos data e hora, nome, email, telefone e whats
+				const dataHoraMarcoZero = abaMarcoZero.getRange(i, colData).getValue();
 				const intervaloMarcoZero = abaMarcoZero.getRange(i, colNome, 1, 3).getValues();
 				const whatsMarcoZero = abaMarcoZero.getRange(i, colWhatsMarcoZero).getValue();
 
@@ -174,32 +187,21 @@ function ImportarDados() {
 				continue;
 			}
 
-			// Se o email já estiver registrado na planilha gerencial
-			const whatsMarcoZero = abaMarcoZero.getRange(i, colWhatsMarcoZero).getValue();
-			abaGerencial.getRange(linhaCampoGerencial, colWhatsGerencial).setValue(whatsMarcoZero);
+			// Se o email não estiver na planilha de interesse e já estiver registrado na planilha gerencial
 			abaGerencial.getRange(linhaCampoGerencial, colRespondeuInteresseGerencial).setValue(respondeuInteresseMarcoZero);
-			continue;
 		}
-
-		// Se a pessoa estiver na planilha de interesse
-
-		// Por algum motivo essa dataHoraMarcaZero retorna o seguinte erro:
-		// Exception: A coluna inicial do intervalo é muito pequena
-		// abaGerencial.getRange(linhaCampoGerencial, colDataMarcoZeroGerencial).setValue(dataHoraMarcoZero);
 	}
 }
 
-// Função que atualizará os campos adicionais da planilha gerencial a partir da planilha de interesse
-const AtualizarCamposAdicionaisInteresse = (linhaInteresse, linhaInserir) => {
-	const whatsInteresse = abaInteresse.getRange(linhaInteresse, colWhatsInteresse).getValue();
-	const respMarcoZero = abaInteresse.getRange(linhaInteresse, colRespondeuMarcoZeroInteresse).getValue();
-	const situacaoInteresse = abaInteresse.getRange(linhaInteresse, colSituacaoInteresse).getValue();
-	const formEnviadoInteresse = abaInteresse.getRange(linhaInteresse, colFormEnviadoInteresse).getValue();
+// Função que importa dados da planilha interesse e do marco zero que não estão na de interesse
+function ImportarDados() {
+	// Chamando funções das planilhas para atualizar seus campos
+	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
+	VerificarMarcoZeroInteresse()
+	VerificarInteresseMarcoZero();
 
-	abaGerencial.getRange(linhaInserir, colWhatsGerencial).setValue(whatsInteresse);
-	abaGerencial.getRange(linhaInserir, colRespondeuMarcoZeroGerencial).setValue(respMarcoZero);
-	abaGerencial.getRange(linhaInserir, colSituacaoGerencial).setValue(situacaoInteresse);
-	abaGerencial.getRange(linhaInserir, colFormEnviadoGerencial).setValue(formEnviadoInteresse);
+	ImportarDadosInteresse();
+	ImportarDadosMarcoZero();
 }
 
 // Função que sincronizará quem entrou no whatsapp entre as três planilhas
@@ -229,7 +231,7 @@ function CompletarVaziosComNao() {
 	for (let j = colWhatsGerencial; j <= ultimaColunaGerencial; j++) {
 
 		// Se a coluna for a de situação, pule
-		if(j == colSituacaoGerencial) continue;
+		if (j == colSituacaoGerencial) continue;
 
 		// Loop das linhas
 		for (let i = 2; i <= ultimalinhaGerencial; i++) {
@@ -286,4 +288,32 @@ function SincronizarCampoPlanilhas(colInteresseDesejada, colPlanilhaDesejada, ab
 			}
 		}
 	}
+}
+
+function CriaContatos() {
+	// for para percorrer todas as linhas
+	for (let i = 2; i <= ultimalinhaGerencial; i++) {
+		// verifica se esta cadastrado no whats ou não 
+		whats = abaGerencial.getRange(i, colWhatsGerencial).getValue();
+		if (whats === "NÃO") {
+			// pega o nome da pessoa e já divide o nome e sobrenome para ficar certo quando for criar o contato
+			let nomes = abaGerencial.getRange(i, colNome).getValue().toString().split(" ");
+			let lengthNomes = nomes.length;
+			// pega o valor do telefone
+			let telefone = abaGerencial.getRange(i, colTel).getValue();
+			// cria o contato 
+			let novoContato = People.People.createContact({
+				// coloca o nome e sobrenome
+				names: [{
+					givenName: nomes[0],
+					familyName: nomes[lengthNomes - 1]
+				}],
+				// coloca o número de telefone
+				phoneNumbers: [{
+					value: telefone.toString()
+				}]
+			});
+		}
+	}
+
 }
