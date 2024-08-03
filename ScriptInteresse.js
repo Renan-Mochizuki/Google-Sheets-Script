@@ -11,8 +11,7 @@ function onOpen(e) {
 onOpen();
 
 //Seleciona a planilha de Confirmação de Interesse e a aba
-const urlInteresse = "*";
-const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
+const planilhaInteresse = SpreadsheetApp.getActiveSpreadsheet();
 const abaInteresse = planilhaInteresse.getSheetByName("Respostas ao formulário 1");
 
 //Seleciona a planilha do Marco Zero e a aba
@@ -33,6 +32,10 @@ const colFormularioEnviado = 16;
 const colWhatsInteresse = 13;
 const colWhatsMarcoZero = 14;
 
+// Email de envio do formulário
+const assuntoEmail = `Formulário Marco Zero`;
+const textoEmail = `Responda o formulário do Marco Zero para dar continuidade a sua formação em Mapas Conceituais. Link: https://forms.gle/YQdMCoemkDiumzyG6`;
+
 //Função para enviar o formulário do Marco Zero
 function EnviarMarcoZero() { //Estamos na planilha de Confirmação de Interesse
 
@@ -50,8 +53,8 @@ function EnviarMarcoZero() { //Estamos na planilha de Confirmação de Interesse
 		if (!foiEnviado || foiEnviado == "NÃO") {
 			MailApp.sendEmail({
 				to: `${email}`,
-				subject: "Formulário Marco Zero",
-				body: "Responda o formulário do Marco Zero para dar continuidade a sua formação em Mapas Conceituais. Link: https://forms.gle/YQdMCoemkDiumzyG6"
+				subject: assuntoEmail,
+				body: textoEmail
 			})
 			celEnviadoMarcoZero.setValue("SIM");
 		}
