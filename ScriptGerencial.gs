@@ -5,7 +5,6 @@ function onOpen(e) {
 		.addItem('📂 Importar Dados', 'ImportarDados')
 		.addItem('🗘 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
 		.addItem('👤 Criar contatos', 'CriaContatos')
-		.addItem('📧 Enviar formulários restantes', 'EnviarMarcoZero')
 		.addItem('🗑️ Excluir todos os campos', 'LimparCampos')
 		.addSeparator()
 		.addSubMenu(ui.createMenu('Formatação da planilha')
@@ -14,28 +13,6 @@ function onOpen(e) {
 			.addItem('Remover linhas vazias', 'RemoverLinhasVazias'))
 		.addToUi();
 }
-onOpen();
-
-//Seleciona a planilha de Confirmação de Interesse e a aba
-const urlInteresse = "*";
-const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
-const abaInteresse = planilhaInteresse.getSheetByName("Respostas ao formulário 1");
-
-//Seleciona a planilha do Marco Zero e a aba
-const urlMarcoZero = "*";
-const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
-const abaMarcoZero = planilhaMarcoZero.getSheetByName("Respostas ao formulário 1");
-
-//Seleciona a planilha Gerencial e a aba
-const planilhaGerencial = SpreadsheetApp.getActiveSpreadsheet();
-const abaGerencial = planilhaGerencial.getSheetByName("Gerencial");
-
-
-//Captura as últimas linhas
-const ultimaLinhaInteresse = abaInteresse.getLastRow();
-const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
-const ultimalinhaGerencial = abaGerencial.getLastRow();
-const ultimaColunaGerencial = abaGerencial.getLastColumn();
 
 // Colunas gerais
 const colData = 1;
@@ -50,7 +27,6 @@ const colEstadoInteresse = 9;
 const colWhatsInteresse = 13;
 const colRespondeuMarcoZeroInteresse = 14;
 const colSituacaoInteresse = 15;
-const colFormEnviadoInteresse = 16;
 // Colunas planilha Marco Zero
 const colRespondeuInteresseMarcoZero = 13;
 const colWhatsMarcoZero = 14;
@@ -61,9 +37,8 @@ const colCidadeGerencial = 6;
 const colEstadoGerencial = 7;
 const colWhatsGerencial = 8;
 const colRespondeuInteresseGerencial = 9;
-const colFormEnviadoGerencial = 10;
+const colRespondeuMarcoZeroGerencial = 10;
 const colSituacaoGerencial = 11;
-const colRespondeuMarcoZeroGerencial = 12;
 
 // Variáveis de otimização
 const ultimaLinhaAnalisadaInteresse = 2;
@@ -141,12 +116,10 @@ function AtualizarCamposAdicionaisInteresse(linhaInteresse, linhaInserir) {
 	const whatsInteresse = abaInteresse.getRange(linhaInteresse, colWhatsInteresse).getValue();
 	const respMarcoZero = abaInteresse.getRange(linhaInteresse, colRespondeuMarcoZeroInteresse).getValue();
 	const situacaoInteresse = abaInteresse.getRange(linhaInteresse, colSituacaoInteresse).getValue();
-	const formEnviadoInteresse = abaInteresse.getRange(linhaInteresse, colFormEnviadoInteresse).getValue();
 
 	abaGerencial.getRange(linhaInserir, colWhatsGerencial).setValue(whatsInteresse);
 	abaGerencial.getRange(linhaInserir, colRespondeuMarcoZeroGerencial).setValue(respMarcoZero);
 	abaGerencial.getRange(linhaInserir, colSituacaoGerencial).setValue(situacaoInteresse);
-	abaGerencial.getRange(linhaInserir, colFormEnviadoGerencial).setValue(formEnviadoInteresse);
 
 	// Se a pessoa tiver respondido o marco zero, pegue a data da resposta e insira
 	if (respMarcoZero == 'SIM') {
@@ -188,7 +161,6 @@ function ImportarDadosMarcoZero() {
 				abaGerencial.getRange(linhaVazia, colDataMarcoZeroGerencial).setValue(dataHoraMarcoZero);
 				abaGerencial.getRange(linhaVazia, colNome, 1, 3).setValues(intervaloMarcoZero);
 				abaGerencial.getRange(linhaVazia, colRespondeuMarcoZeroGerencial).setValue("SIM");
-				abaGerencial.getRange(linhaVazia, colFormEnviadoGerencial).setValue("SIM");
 				abaGerencial.getRange(linhaVazia, colWhatsGerencial).setValue(whatsMarcoZero);
 				abaGerencial.getRange(linhaVazia, colRespondeuInteresseGerencial).setValue(respondeuInteresseMarcoZero);
 
@@ -232,13 +204,14 @@ function LimparCampos() {
 
 	if (response == ui.Button.YES) {
 		// Loop das linhas
-		for (let i = 2; i <= ultimalinhaGerencial; i++) {
-			// Loop das colunas
-			for (let j = 1; j <= ultimaColunaGerencial; j++) {
-				const celula = abaGerencial.getRange(i, j)
-				celula.setValue('');
-				celula.setBackground('#ffffff');
-			}
+		// Verifica se há mais de uma linha para limpar
+		if (ultimalinhaGerencial > 1) {
+			// Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
+			const intervalo = abaGerencial.getRange(2, 1, ultimalinhaGerencial - 1, ultimaColunaGerencial);
+
+			// Limpa o conteúdo do intervalo selecionado
+			intervalo.clearContent();
+			intervalo.setBackground('#ffffff');
 		}
 	}
 }
@@ -349,29 +322,6 @@ function SincronizarCampoPlanilhas(colInteresseDesejada, colPlanilhaDesejada, ab
 			}
 		}
 	}
-}
-
-// Função para enviar o formulário do Marco Zero
-function EnviarMarcoZero() {
-	for (let i = 2; i <= ultimalinhaGerencial; i++) {
-		const email = abaGerencial.getRange(i, colEmail).getValue();
-		const celEnviadoMarcoZero = abaGerencial.getRange(i, colFormEnviadoGerencial);
-		const foiEnviado = celEnviadoMarcoZero.getValue();
-
-		// Se o campo email estiver vazio passe para o próximo
-		if (!email) continue;
-
-		if (!foiEnviado || foiEnviado == "NÃO") {
-			MailApp.sendEmail({
-				to: `${email}`,
-				subject: assuntoEmail,
-				body: textoEmail
-			})
-			celEnviadoMarcoZero.setValue("SIM");
-		}
-	}
-
-	SincronizarCampoPlanilhas(colFormEnviadoInteresse, colFormEnviadoGerencial, abaGerencial);
 }
 
 function CriaContatos() {

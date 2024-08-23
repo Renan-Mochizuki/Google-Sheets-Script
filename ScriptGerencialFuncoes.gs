@@ -15,7 +15,6 @@ const VerificarMarcoZeroInteresse = () => {
     //Pegar o email na planilha Interesse
     for (let i = 2; i <= ultimaLinhaInteresse; i++) {
         const emailInteresse = abaInteresse.getRange(i, colEmail).getValue();
-        const celEnviadoMarcoZero = abaInteresse.getRange(i, colFormEnviadoInteresse);
         const celRespondeuMarcoZero = abaInteresse.getRange(i, colRespondeuMarcoZeroInteresse);
         const valRespondeuMarcoZero = celRespondeuMarcoZero.getValue();
 
@@ -30,7 +29,6 @@ const VerificarMarcoZeroInteresse = () => {
 
         if (RetornarLinhaEmailMarcoZero(emailInteresse)) {
             celRespondeuMarcoZero.setValue("SIM");
-            celEnviadoMarcoZero.setValue("SIM");
         } else {
             celRespondeuMarcoZero.setValue("NÃO");
         }
@@ -63,8 +61,8 @@ function VerificarInteresseMarcoZero() {
             continue;
         }
 
-        // Se o campo já estiver marcado passe para o próximo
-        if (valEstaNaInteresse) continue;
+        // Se o campo já estiver marcado como "SIM" passe para o próximo
+        if (valEstaNaInteresse == "SIM") continue;
 
         if (RetornarLinhaEmailInteresse(emailMarcoZero))
             celEstaNaInteresse.setValue("SIM");
