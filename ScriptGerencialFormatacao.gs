@@ -1,4 +1,4 @@
-// -- Funções de formatação da planilha gerencial --
+// -- Funções de formatação da planilha --
 
 // Função para limpar toda a planilha
 function LimparPlanilha() {
@@ -7,9 +7,9 @@ function LimparPlanilha() {
 
 	if (response == ui.Button.YES) {
 		// Verifica se há mais de uma linha para limpar
-		if (ultimalinhaGerencial > 1) {
+		if (ultimaLinhaAtiva > 1) {
 			// Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
-			const planilha = abaGerencial.getRange(2, 1, ultimalinhaGerencial - 1, ultimaColunaGerencial);
+			const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
 
 			// Limpa o conteúdo do intervalo selecionado
 			planilha.clearContent();
@@ -18,7 +18,7 @@ function LimparPlanilha() {
 	}
 }
 
-// Função que completa todos os campos vazios adicionais com NÃO
+// Função que completa todos os campos vazios adicionais da planilha gerencial com NÃO
 function CompletarVaziosComNao() {
 	// Loop das colunas
 	for (let j = colWhatsGerencial; j <= ultimaColunaGerencial; j++) {
@@ -67,23 +67,23 @@ function FormatarTelefone(textoTelefone) {
 
 function FormatarLinhasTelefone() {
 	// Loop das linhas
-	for (let i = 2; i <= ultimalinhaGerencial; i++) {
-		const valorTelefone = abaGerencial.getRange(i, colTelGerencial).getValue();
+	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
+		const valorTelefone = abaAtiva.getRange(i, colTelAtiva).getValue();
 
 		// Se o campo estiver vazio, passe para o próximo
 		if (!valorTelefone) continue;
 
 		const telefoneFormatado = FormatarTelefone(valorTelefone)
-		abaGerencial.getRange(i, colTelGerencial).setValue(telefoneFormatado);
+		abaAtiva.getRange(i, colTelAtiva).setValue(telefoneFormatado);
 	}
 }
 
 // Função que remove todas linhas vazias no meio da planilha
 function RemoverLinhasVazias() {
-	for (let i = 2; i <= ultimalinhaGerencial; i++) {
-		const emailGerencial = abaGerencial.getRange(i, colEmailGerencial).getValue();
-		if (!emailGerencial) {
-			abaGerencial.deleteRow(i);
+	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
+		const emailAtiva = abaAtiva.getRange(i, colEmailAtiva).getValue();
+		if (!emailAtiva) {
+			abaAtiva.deleteRow(i);
 		}
 	}
 }
