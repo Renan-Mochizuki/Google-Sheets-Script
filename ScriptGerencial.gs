@@ -19,7 +19,7 @@ function onOpen(e) {
 // 	  Ver arquivo constants
 //
 // -- Funções da Gerencial: --
-//    RetornarLinhaEmailGerencial: Retorna a linha daquele email na planilha Gerencial, se não existir, retorna false
+//    RetornarLinhaEmailPlanilha: Retorna a linha daquele email na planilha desejada, se não existir, retorna false
 //    Importar: chama outras funções para sincronizar as planilhas e chama as funções de importação de todos dados
 //    ImportarDados: função genérica para chamar a função de importação de dados para cada planilha
 //    ImportarDadosInteresse: Pega todos os dados da Interesse e move na Gerencial ou apenas atualiza os campos adicionais
@@ -29,7 +29,7 @@ function onOpen(e) {
 //    ImportarDadosCertificado: Pega todos os dados do Certificado e move na Gerencial ou apenas atualiza os campos adicionais
 //    AtualizarCamposAdicionaisInteresse: Atualiza os campos adicionais da planilha gerencial a partir da planilha de interesse
 //    SincronizarWhatsGerencial: Sincroniza o campo do whatsapp entre todas as planilhas
-//    SincronizarCampoPlanilhas: Sincroniza um campo escolhido entre as planilha Interesse e Marco Zero ou então, uma desejada
+//    SincronizarCampoPlanilhas: Sincroniza um campo escolhido entre duas planilhas desejadas
 //    CriaContatos (Função não finalizada): Cria contatos no Google People a partir dos dados da planilha Gerencial 
 //
 // -- Funções de formatação: --
@@ -40,27 +40,28 @@ function onOpen(e) {
 //    RemoverLinhasVazias: Remove linhas que estiverem sem email
 //
 // -- Funções das planilhas Interesse e Marco Zero: --
-//    RetornarLinhaEmailInteresse: Retorna a linha daquele email na planilha Interesse, se não existir, retorna false
 //    VerificarMarcoZeroInteresse: Verifica quem respondeu o Marco Zero na planilha Interesse
-//    RetornarLinhaEmailMarcoZero: Retorna a linha daquele email na planilha Marco Zero, se não existir, retorna false
 //    VerificarInteresseMarcoZero: Verifica se a pessoa do Marco Zero está cadastrada na planilha de Interesse
 
-// Função que verificará se o email existe na planilha Gerencial e retornará a linha
-function RetornarLinhaEmailGerencial(emailInformado) {
-	//Conferir todos os emails da planilha Gerencial
-	for (let i = 2; i <= ultimalinhaGerencial; i++) {
-		const emailGerencial = abaGerencial.getRange(i, colEmailGerencial).getValue();
+// Função que verificará se o email existe na planilha desejada e retornará a linha
+const RetornarLinhaEmailPlanilha = (emailProcurado, abaDesejada) => {
+    // Pegar variáveis da planilha desejada
+	let { ultimaLinha, colEmail} = objetoMap.get(abaDesejada) || {};
 
-		if (emailInformado == emailGerencial) return i;
-	}
-	// Se não for encontrado nenhum 
-	return false;
+    //Conferir todos os emails da planilha desejada
+    for (let i = 2; i <= ultimaLinha; i++) {
+        const email = abaDesejada.getRange(i, colEmail).getValue();
+
+        if (emailProcurado == email) return i;
+    }
+    // Se não for encontrado nenhum 
+    return false;
 }
 
 // Função que executa as funções necessárias para importar todos os dados
 function Importar() {
 	// Chamando funções das planilhas para atualizar seus campos
-	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
+	SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
 	VerificarMarcoZeroInteresse()
 	VerificarInteresseMarcoZero();
 
@@ -73,7 +74,7 @@ function Importar() {
 
 // Função genérica de importação para todas planilhas
 function ImportarDados(abaDesejada) {
-	// Pegando a próxima linha vazia da planilha
+	// Pegando a próxima linha vazia da planilha gerencial
 	let linhaVazia = abaGerencial.getLastRow() + 1;
 
 	// Atribui os variáveis de acordo com a abaDesejada
@@ -86,7 +87,7 @@ function ImportarDados(abaDesejada) {
 		// Se não existir email, passe para o próximo
 		if (!email) continue;
 
-		const linhaCampoGerencial = RetornarLinhaEmailGerencial(email);
+		const linhaCampoGerencial = RetornarLinhaEmailPlanilha(email, abaGerencial);
 
 		const novaLinhaCriada = ImportarDadosPlanilha(i, linhaCampoGerencial, linhaVazia);
 
@@ -256,53 +257,54 @@ function AtualizarCamposAdicionaisInteresse(linhaInteresse, linhaInserir) {
 // Função que sincronizará quem entrou no whatsapp entre as três planilhas
 function SincronizarWhatsGerencial() {
 	// Sincronize as planilhas Interesse e Marco Zero, depois as planilhas Interesse e Gerencial e por fim, Interesse e Marco Zero de novo
-	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
-	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsGerencial, abaGerencial);
-	SincronizarCampoPlanilhas(colWhatsInteresse, colWhatsMarcoZero);
+	SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
+	SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaGerencial, colWhatsGerencial);
+	SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
 }
 
-// Função que sincronizará um dado campo entre as planilhas Interesse e uma outra desejada, caso não for informada,
-// A outra planilha será o Marco Zero
-function SincronizarCampoPlanilhas(colInteresseDesejada, colPlanilhaDesejada, abaDesejada) {
-	for (let i = 2; i <= ultimaLinhaInteresse; i++) {
-		const emailInteresse = abaInteresse.getRange(i, colEmailInteresse).getValue();
+// Função que sincronizará um dado campo entre duas planilhas passadas
+function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, colDesejada2) {
+	// Atribui os variáveis de acordo com a abaDesejada1
+	let { ultimaLinha, colEmail} = objetoMap.get(abaDesejada1) || {};
+	
+	for (let i = 2; i <= ultimaLinha; i++) {
+		const emailDesejada1 = abaDesejada1.getRange(i, colEmail).getValue();
 
 		// Se o campo estiver vazio, passe para o próximo
-		if (!emailInteresse)
+		if (!emailDesejada1)
 			continue;
 
-		// Se a aba desejada for a gerencial, use a função da gerencial, se não, use a função do marco zero
-		const linhaCampoPlanilhaDesejada = abaDesejada == abaGerencial ? RetornarLinhaEmailGerencial(emailInteresse) : RetornarLinhaEmailMarcoZero(emailInteresse);
-		const abaPlanilhaDesejada = abaDesejada ?? abaMarcoZero;
+		// Pegue a linha do campo na planilha desejada 2
+		const linhaCampoDesejada2 = RetornarLinhaEmailPlanilha(emailDesejada1, abaDesejada2);
 
 		// Se o email for encontrado na outra planilha
-		if (linhaCampoPlanilhaDesejada) {
-			const celInteresse = abaInteresse.getRange(i, colInteresseDesejada);
-			const valInteresse = celInteresse.getValue();
-			const celPlanilhaDesejada = abaPlanilhaDesejada.getRange(linhaCampoPlanilhaDesejada, colPlanilhaDesejada);
-			const valPlanilhaDesejada = celPlanilhaDesejada.getValue();
+		if (linhaCampoDesejada2) {
+			const celDesejada1 = abaDesejada1.getRange(i, colDesejada1);
+			const valDesejada1 = celDesejada1.getValue();
+			const celDesejada2 = abaDesejada2.getRange(linhaCampoDesejada2, colDesejada2);
+			const valDesejada2 = celDesejada2.getValue();
 
-			// Se o campo do Interesse estiver vazio, altere o campo do Interesse com o valor da outra planilha
-			if (!valInteresse) {
-				celInteresse.setValue(valPlanilhaDesejada);
+			// Se o campo do Desejada1 estiver vazio, altere o campo do Desejada1 com o valor da outra planilha
+			if (!valDesejada1) {
+				celDesejada1.setValue(valDesejada2);
 				continue;
 			}
 
-			// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Interesse
-			if (!valPlanilhaDesejada) {
-				celPlanilhaDesejada.setValue(valInteresse);
+			// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Desejada1
+			if (!valDesejada2) {
+				celDesejada2.setValue(valDesejada1);
 				continue;
 			}
 
-			// Se o campo do Interesse estiver como sim e da outra como não, altere o campo da outra planilha
-			if (valInteresse == "SIM" && valPlanilhaDesejada == "NÃO") {
-				celPlanilhaDesejada.setValue("SIM");
+			// Se o campo do Desejada1 estiver como sim e da outra como não, altere o campo da outra planilha
+			if (valDesejada1 == "SIM" && valDesejada2 == "NÃO") {
+				celDesejada2.setValue("SIM");
 				continue;
 			}
 
-			// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Interesse
-			if (valPlanilhaDesejada == "SIM" && valInteresse == "NÃO") {
-				celInteresse.setValue("SIM");
+			// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Desejada1
+			if (valDesejada2 == "SIM" && valDesejada1 == "NÃO") {
+				celDesejada1.setValue("SIM");
 				continue;
 			}
 		}
@@ -311,7 +313,7 @@ function SincronizarCampoPlanilhas(colInteresseDesejada, colPlanilhaDesejada, ab
 
 function CriaContatos() {
 	// for para percorrer todas as linhas
-	for (let i = ultimaLinhaAnalisadaWhatsGerencial; i <= ultimalinhaGerencial; i++) {
+	for (let i = ultimaLinhaAnalisadaWhatsGerencial; i <= ultimaLinhaGerencial; i++) {
 		// verifica se esta cadastrado no whats ou não 
 		const celGerencialWhats = abaGerencial.getRange(i, colWhatsGerencial)
 		const whats = celGerencialWhats.getValue();

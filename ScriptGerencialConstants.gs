@@ -69,9 +69,11 @@ const colLinkTestadoCertificado = 9;
 const colEntrouGrupoCertificado = 10;
 
 
-// Variáveis de otimização
+// Variáveis de otimização (Possível futura implementação)
+// Ideia: Armazenar a ultima linha analisada para reduzir o tamanho do loop, assim evitando analisar campos já analisados toda vez
 const ultimaLinhaAnalisadaInteresse = 2;
 const ultimaLinhaAnalisadaMarcoZero = 2;
+const ultimaLinhaAnalisadaGerencial = 2;
 const ultimaLinhaAnalisadaEnvioMapa = 2;
 const ultimaLinhaAnalisadaMarcoFinal = 2;
 const ultimaLinhaAnalisadaCertificado = 2;
@@ -113,7 +115,7 @@ const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
 const ultimaLinhaEnvioMapa = abaEnvioMapa.getLastRow();
 const ultimaLinhaMarcoFinal = abaMarcoFinal.getLastRow();
 const ultimaLinhaCertificado = abaCertificado.getLastRow();
-const ultimalinhaGerencial = abaGerencial.getLastRow();
+const ultimaLinhaGerencial = abaGerencial.getLastRow();
 const ultimaColunaGerencial = abaGerencial.getLastColumn();
 
 // Variável genérica da planilha ativa
@@ -137,6 +139,11 @@ const objetoMap = new Map([
         ultimaLinha: ultimaLinhaMarcoZero,
         colEmail: colEmailMarcoZero,
         ImportarDadosPlanilha: ImportarDadosMarcoZero
+    }],
+    [abaGerencial, {
+        ultimaLinhaAnalisada: ultimaLinhaAnalisadaGerencial,
+        ultimaLinha: ultimaLinhaGerencial,
+        colEmail: colEmailGerencial
     }],
     [abaEnvioMapa, {
         ultimaLinhaAnalisada: ultimaLinhaAnalisadaEnvioMapa,

@@ -27,7 +27,7 @@ function CompletarVaziosComNao() {
 		if (j == colSituacaoGerencial) continue;
 
 		// Loop das linhas
-		for (let i = 2; i <= ultimalinhaGerencial; i++) {
+		for (let i = 2; i <= ultimaLinhaGerencial; i++) {
 			const celula = abaGerencial.getRange(i, j)
 			const valor = celula.getValue();
 			if (!valor) celula.setValue("NÃO");
