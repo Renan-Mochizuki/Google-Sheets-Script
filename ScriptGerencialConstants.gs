@@ -1,72 +1,94 @@
-// Colunas gerais
-const colNomeGeral = 3;
-const colEmailGeral = 4;
-const colTelGeral = 5;
+// Função que recebe o nome da coluna e transforma em número (Ex.: A = 1; Z = 26; AA = 27; AB = 28)
+function Coluna(letras) {
+    let numero = 0;
+    for (let i = 0; i < letras.length; i++) {
+        numero = numero * 26 + (letras[i].toUpperCase().charCodeAt(0) - 64);
+    }
+    return numero;
+}
+
+
+// Colunas Gerais
+const colNomeGeral = Coluna('C');
+const colEmailGeral = Coluna('D');
+const colTelGeral = Coluna('E');
+
 // Colunas planilha Interesse
 const colNomeInteresse = colNomeGeral;
 const colEmailInteresse = colEmailGeral;
 const colTelInteresse = colTelGeral;
-const colCidadeInteresse = 8;
-const colEstadoInteresse = 9;
-const colWhatsInteresse = 13;
-const colRespondeuMarcoZeroInteresse = 14;
-const colSituacaoInteresse = 15;
+
+const colCidadeInteresse = Coluna('H');
+const colEstadoInteresse = Coluna('I');
+const colWhatsInteresse = Coluna('M');
+const colRespondeuMarcoZeroInteresse = Coluna('N');
+const colSituacaoInteresse = Coluna('O');
+
 // Colunas planilha Marco Zero
 const colNomeMarcoZero = colNomeGeral;
 const colEmailMarcoZero = colEmailGeral;
 const colTelMarcoZero = colTelGeral;
-const colRespondeuInteresseMarcoZero = 13;
-const colWhatsMarcoZero = 14;
+
+const colRespondeuInteresseMarcoZero = Coluna('M');
+const colWhatsMarcoZero = Coluna('N');
+
 // Colunas planilha Gerencial
-const colEmailsTelefonesAlternativosGerencial = 1;
-const colTerminouCursoGerencial = 2;
 const colNomeGerencial = colNomeGeral;
 const colEmailGerencial = colEmailGeral;
 const colTelGerencial = colTelGeral;
-const colCidadeGerencial = 6;
-const colEstadoGerencial = 7;
-const colWhatsGerencial = 8;
-const colRespondeuInteresseGerencial = 9;
-const colRespondeuMarcoZeroGerencial = 10;
-const colSituacaoGerencial = 11;
-const colLinkMapaGerencial = 12;
-const colTextoMapaGerencial = 13;
-const colPrazoEnvioMapaGerencial = 14;
-const colComentarioEnviadoMapaGerencial = 15;
-const colMensagemVerificacaoMapaGerencial = 16;
-const colRespondeuMarcoFinalGerencial = 17;
-const colEnviouReflexaoMarcoFinalGerencial = 18;
-const colPrazoEnvioMarcoFinalGerencial = 19;
-const colComentarioEnviadoMarcoFinalGerencial = 20;
-const colDataCertificadoGerencial = 21;
-const colLinkCertificadoGerencial = 22;
-const colLinkTestadoCertificadoGerencial = 23;
-const colEntrouGrupoCertificadoGerencial = 24;
+
+const colEmailsTelefonesAlternativosGerencial = Coluna('A');
+const colTerminouCursoGerencial = Coluna('B');
+const colCidadeGerencial = Coluna('F');
+const colEstadoGerencial = Coluna('G');
+const colWhatsGerencial = Coluna('H');
+const colRespondeuInteresseGerencial = Coluna('I');
+const colRespondeuMarcoZeroGerencial = Coluna('J');
+const colSituacaoGerencial = Coluna('K');
+const colLinkMapaGerencial = Coluna('L');
+const colTextoMapaGerencial = Coluna('M');
+const colPrazoEnvioMapaGerencial = Coluna('N');
+const colComentarioEnviadoMapaGerencial = Coluna('O');
+const colMensagemVerificacaoMapaGerencial = Coluna('P');
+const colRespondeuMarcoFinalGerencial = Coluna('Q');
+const colEnviouReflexaoMarcoFinalGerencial = Coluna('R');
+const colPrazoEnvioMarcoFinalGerencial = Coluna('S');
+const colComentarioEnviadoMarcoFinalGerencial = Coluna('T');
+const colDataCertificadoGerencial = Coluna('U');
+const colLinkCertificadoGerencial = Coluna('V');
+const colLinkTestadoCertificadoGerencial = Coluna('W');
+const colEntrouGrupoCertificadoGerencial = Coluna('X');
+
 // Colunas planilha Envio Mapa
-const colDataEnvioMapa = 1;
 const colNomeEnvioMapa = colNomeGeral;
 const colEmailEnvioMapa = colEmailGeral;
 const colTelEnvioMapa = colTelGeral;
-const colLinkMapa = 9;
-const colTextoMapa = 10;
-const colComentarioEnviadoMapa = 11;
-const colPrazoEnvioMapa = 12;
-const colMensagemVerificacaoMapa = 13;
+
+const colDataEnvioMapa = Coluna('A');
+const colLinkMapa = Coluna('I');
+const colTextoMapa = Coluna('J');
+const colComentarioEnviadoMapa = Coluna('K');
+const colPrazoEnvioMapa = Coluna('L');
+const colMensagemVerificacaoMapa = Coluna('M');
+
 // Colunas planilha Marco Final
 const colNomeMarcoFinal = colNomeGeral;
 const colEmailMarcoFinal = colEmailGeral;
 const colTelMarcoFinal = colTelGeral;
-const colEnviouReflexaoMarcoFinal = 13;
-const colPrazoEnvioMarcoFinal = 14;
-const colComentarioEnviadoMarcoFinal = 15;
+
+const colEnviouReflexaoMarcoFinal = Coluna('M');
+const colPrazoEnvioMarcoFinal = Coluna('N');
+const colComentarioEnviadoMarcoFinal = Coluna('O');
+
 // Colunas planilha Envio Certificado
 const colNomeCertificado = colNomeGeral;
 const colEmailCertificado = colEmailGeral;
 const colTelCertificado = colTelGeral;
-const colDataCertificado = 7;
-const colLinkCertificado = 8;
-const colLinkTestadoCertificado = 9;
-const colEntrouGrupoCertificado = 10;
+
+const colDataCertificado = Coluna('G');
+const colLinkCertificado = Coluna('H');
+const colLinkTestadoCertificado = Coluna('I');
+const colEntrouGrupoCertificado = Coluna('J');
 
 
 // Variáveis de otimização (Possível futura implementação)
@@ -79,29 +101,25 @@ const ultimaLinhaAnalisadaMarcoFinal = 2;
 const ultimaLinhaAnalisadaCertificado = 2;
 const ultimaLinhaAnalisadaWhatsGerencial = 2;
 
+// -- Links das planilhas no arquivo Links
 
 // Seleciona a planilha de Confirmação de Interesse e a aba
-const urlInteresse = "https://docs.google.com/spreadsheets/d/1TztdPoYhZ6t_ExftBE3gtugVyPSKRDx0IPLZTAJNmlI/edit?gid=320866237#gid=320866237";
 const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
 const abaInteresse = planilhaInteresse.getSheets()[0]
 
 // Seleciona a planilha do Marco Zero e a aba
-const urlMarcoZero = "https://docs.google.com/spreadsheets/d/1--p65M1CNQlUz1vCLWovFWWqflwZVvTnMCeWm5mj3Gs/edit?gid=861556083#gid=861556083"
 const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
 const abaMarcoZero = planilhaMarcoZero.getSheets()[0]
 
 // Seleciona a planilha do Envio do Mapa e a aba
-const urlEnvioMapa = "https://docs.google.com/spreadsheets/d/1FzBClWA5X2YvIkCDhMcKI8t8RnDDrzTAFJ7QJ-mADTA/edit?gid=0#gid=0"
 const planilhaEnvioMapa = SpreadsheetApp.openByUrl(urlEnvioMapa);
 const abaEnvioMapa = planilhaEnvioMapa.getSheets()[0]
 
 // Seleciona a planilha do Marco Final e a aba
-const urlMarcoFinal = "https://docs.google.com/spreadsheets/d/1vjuBOGuX3T0mIZX3Ac4dLFGcEBJTT2_YKjeD_fD24VI/edit?gid=0#gid=0"
 const planilhaMarcoFinal = SpreadsheetApp.openByUrl(urlMarcoFinal);
 const abaMarcoFinal = planilhaMarcoFinal.getSheets()[0]
 
 // Seleciona a planilha do Envio do Certificado e a aba
-const urlCertificado = "https://docs.google.com/spreadsheets/d/1vjuBOGuX3T0mIZX3Ac4dLFGcEBJTT2_YKjeD_fD24VI/edit?gid=0#gid=0"
 const planilhaCertificado = SpreadsheetApp.openByUrl(urlCertificado);
 const abaCertificado = planilhaCertificado.getSheets()[0]
 
