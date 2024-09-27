@@ -2,6 +2,7 @@
 .expo/
 dist/
 node_modules
-Teste.js
 package.json
 package-lock.json
+ScriptGerencialLinks.gs
+Teste.js

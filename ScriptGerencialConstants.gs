@@ -7,6 +7,10 @@ function Coluna(letras) {
     return numero;
 }
 
+// Para melhorar a performance, foi utilizado intervalos, por isso é necessário que os campos dessas planilhas estejam na ordem descrita:
+// Gerencial:
+// -Nome, Email, Telefone, Cidade, Estado, Whats, RespondeuInteresse, Respondeu MarcoZero, Situacao
+
 
 // Colunas Gerais
 const colNomeGeral = Coluna('C');
@@ -31,33 +35,6 @@ const colTelMarcoZero = colTelGeral;
 
 const colRespondeuInteresseMarcoZero = Coluna('M');
 const colWhatsMarcoZero = Coluna('N');
-
-// Colunas planilha Gerencial
-const colNomeGerencial = colNomeGeral;
-const colEmailGerencial = colEmailGeral;
-const colTelGerencial = colTelGeral;
-
-const colEmailsTelefonesAlternativosGerencial = Coluna('A');
-const colTerminouCursoGerencial = Coluna('B');
-const colCidadeGerencial = Coluna('F');
-const colEstadoGerencial = Coluna('G');
-const colWhatsGerencial = Coluna('H');
-const colRespondeuInteresseGerencial = Coluna('I');
-const colRespondeuMarcoZeroGerencial = Coluna('J');
-const colSituacaoGerencial = Coluna('K');
-const colLinkMapaGerencial = Coluna('L');
-const colTextoMapaGerencial = Coluna('M');
-const colPrazoEnvioMapaGerencial = Coluna('N');
-const colComentarioEnviadoMapaGerencial = Coluna('O');
-const colMensagemVerificacaoMapaGerencial = Coluna('P');
-const colRespondeuMarcoFinalGerencial = Coluna('Q');
-const colEnviouReflexaoMarcoFinalGerencial = Coluna('R');
-const colPrazoEnvioMarcoFinalGerencial = Coluna('S');
-const colComentarioEnviadoMarcoFinalGerencial = Coluna('T');
-const colDataCertificadoGerencial = Coluna('U');
-const colLinkCertificadoGerencial = Coluna('V');
-const colLinkTestadoCertificadoGerencial = Coluna('W');
-const colEntrouGrupoCertificadoGerencial = Coluna('X');
 
 // Colunas planilha Envio Mapa
 const colNomeEnvioMapa = colNomeGeral;
@@ -90,12 +67,38 @@ const colLinkCertificado = Coluna('H');
 const colLinkTestadoCertificado = Coluna('I');
 const colEntrouGrupoCertificado = Coluna('J');
 
+// Colunas planilha Gerencial
+const colNomeGerencial = colNomeGeral;
+const colEmailGerencial = colEmailGeral;
+const colTelGerencial = colTelGeral;
+
+const colEmailsTelefonesAlternativosGerencial = Coluna('A');
+const colTerminouCursoGerencial = Coluna('B');
+const colCidadeGerencial = Coluna('F');
+const colEstadoGerencial = Coluna('G');
+const colWhatsGerencial = Coluna('H');
+const colRespondeuInteresseGerencial = Coluna('I');
+const colRespondeuMarcoZeroGerencial = Coluna('J');
+const colSituacaoGerencial = Coluna('K');
+const colLinkMapaGerencial = Coluna('L');
+const colTextoMapaGerencial = Coluna('M');
+const colPrazoEnvioMapaGerencial = Coluna('N');
+const colComentarioEnviadoMapaGerencial = Coluna('O');
+const colMensagemVerificacaoMapaGerencial = Coluna('P');
+const colRespondeuMarcoFinalGerencial = Coluna('Q');
+const colEnviouReflexaoMarcoFinalGerencial = Coluna('R');
+const colPrazoEnvioMarcoFinalGerencial = Coluna('S');
+const colComentarioEnviadoMarcoFinalGerencial = Coluna('T');
+const colDataCertificadoGerencial = Coluna('U');
+const colLinkCertificadoGerencial = Coluna('V');
+const colLinkTestadoCertificadoGerencial = Coluna('W');
+const colEntrouGrupoCertificadoGerencial = Coluna('X');
+
 
 // Variáveis de otimização (Possível futura implementação)
-// Ideia: Armazenar a ultima linha analisada para reduzir o tamanho do loop, assim evitando analisar campos já analisados toda vez
+// Ideia: Armazenar a ultima linha analisada para reduzir o tamanho do loop, assim evitando analisar toda vez campos já analisados
 const ultimaLinhaAnalisadaInteresse = 2;
 const ultimaLinhaAnalisadaMarcoZero = 2;
-const ultimaLinhaAnalisadaGerencial = 2;
 const ultimaLinhaAnalisadaEnvioMapa = 2;
 const ultimaLinhaAnalisadaMarcoFinal = 2;
 const ultimaLinhaAnalisadaCertificado = 2;
@@ -134,6 +137,11 @@ const ultimaLinhaEnvioMapa = abaEnvioMapa.getLastRow();
 const ultimaLinhaMarcoFinal = abaMarcoFinal.getLastRow();
 const ultimaLinhaCertificado = abaCertificado.getLastRow();
 const ultimaLinhaGerencial = abaGerencial.getLastRow();
+const ultimaColunaInteresse = abaInteresse.getLastColumn();
+const ultimaColunaMarcoZero = abaMarcoZero.getLastColumn();
+const ultimaColunaEnvioMapa = abaEnvioMapa.getLastColumn();
+const ultimaColunaMarcoFinal = abaMarcoFinal.getLastColumn();
+const ultimaColunaCertificado = abaCertificado.getLastColumn();
 const ultimaColunaGerencial = abaGerencial.getLastColumn();
 
 // Variável genérica da planilha ativa
@@ -158,11 +166,6 @@ const objetoMap = new Map([
         colEmail: colEmailMarcoZero,
         ImportarDadosPlanilha: ImportarDadosMarcoZero
     }],
-    [abaGerencial, {
-        ultimaLinhaAnalisada: ultimaLinhaAnalisadaGerencial,
-        ultimaLinha: ultimaLinhaGerencial,
-        colEmail: colEmailGerencial
-    }],
     [abaEnvioMapa, {
         ultimaLinhaAnalisada: ultimaLinhaAnalisadaEnvioMapa,
         ultimaLinha: ultimaLinhaEnvioMapa,
@@ -180,5 +183,9 @@ const objetoMap = new Map([
         ultimaLinha: ultimaLinhaCertificado,
         colEmail: colEmailCertificado,
         ImportarDadosPlanilha: ImportarDadosCertificado
+    }],
+    [abaGerencial, {
+        ultimaLinha: ultimaLinhaGerencial,
+        colEmail: colEmailGerencial
     }]
 ]);

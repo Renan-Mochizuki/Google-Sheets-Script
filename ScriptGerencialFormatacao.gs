@@ -18,17 +18,17 @@ function LimparPlanilha() {
 	}
 }
 
-// Função que completa todos os campos vazios adicionais da planilha gerencial com NÃO
+// Função que completa campos vazios adicionais da planilha gerencial com NÃO
 function CompletarVaziosComNao() {
-	// Loop das colunas
-	for (let j = colWhatsGerencial; j <= ultimaColunaGerencial; j++) {
+	const colunas = [colWhatsGerencial, colRespondeuInteresseGerencial, colRespondeuMarcoZeroGerencial, colRespondeuMarcoFinalGerencial, colEnviouReflexaoMarcoFinalGerencial];
 
-		// Se a coluna for a de situação, pule
-		if (j == colSituacaoGerencial) continue;
+	// Loop das colunas
+	for (let j = 0; j < colunas.length; j++) {
+		const coluna = colunas[j];
 
 		// Loop das linhas
 		for (let i = 2; i <= ultimaLinhaGerencial; i++) {
-			const celula = abaGerencial.getRange(i, j)
+			const celula = abaGerencial.getRange(i, coluna)
 			const valor = celula.getValue();
 			if (!valor) celula.setValue("NÃO");
 		}
