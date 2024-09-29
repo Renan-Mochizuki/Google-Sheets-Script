@@ -3,19 +3,19 @@
 // Função para limpar toda a planilha
 function LimparPlanilha() {
 	// Janela de diálogo de confirmação da ação
-	const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos?', ui.ButtonSet.YES_NO);
+	// const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos?', ui.ButtonSet.YES_NO);
 
-	if (response == ui.Button.YES) {
+	// if (response == ui.Button.YES) {
 		// Verifica se há mais de uma linha para limpar
-		if (ultimaLinhaAtiva > 1) {
+		// if (ultimaLinhaAtiva > 1) {
 			// Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
 			const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
 
 			// Limpa o conteúdo do intervalo selecionado
 			planilha.clearContent();
 			planilha.setBackground('#ffffff');
-		}
-	}
+		// }
+	// }
 }
 
 // Função que completa campos vazios adicionais da planilha gerencial com NÃO

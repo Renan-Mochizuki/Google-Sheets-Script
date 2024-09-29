@@ -35,10 +35,16 @@ function onOpen(e) {
 //    - pega todos os dados do Marco Final e move na Gerencial ou apenas atualiza os campos adicionais
 //    ImportarDadosCertificado(linhaAtual, linhaCampoGerencial, linhaVazia):
 //    - pega todos os dados do Certificado e move na Gerencial ou apenas atualiza os campos adicionais
+//    LidarComPessoaNaoCadastrada():
+//    - função genérica para lidar com pessoas que estão em formulários posteriores sem estar na de interesse ou marco zero   
+//    InserirRedirecionamentoPlanilha(linhaAtual, colInserir, urlInteresse, linhaDestino):
+//    - insere um link em um campo para um campo específico em outra planilha
 //    SincronizarWhatsGerencial():
 //    - sincroniza o campo do whatsapp entre todas as planilhas
 //    SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, colDesejada2):
 //    - sincroniza um campo escolhido entre duas planilhas desejadas
+//    CompararValoresEMarcar(celDesejada1, celDesejada2):
+//    - função genérica usada pela função SincronizarCampoPlanilhas para sincronizar dois campos de "SIM" ou "NÃO"
 //    VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro, abaParaVerificar, valCustomizadoSim, valCustomizadoNao):
 //    - verifica se a pessoa está cadastrada em uma planilha e marca em outra
 //    CriaContatos(): (Função não finalizada)
@@ -120,7 +126,6 @@ function ImportarDados(abaDesejada) {
 
 		// Se não existir email, passe para o próximo
 		if (!email) continue;
-
 		const linhaCampoGerencial = RetornarLinhaEmailPlanilha(email, abaGerencial);
 
 		const novaLinhaCriada = ImportarDadosPlanilha(i, linhaCampoGerencial, linhaVazia);
@@ -159,6 +164,7 @@ function ImportarDadosInteresse(linhaAtual, linhaCampoGerencial, linhaVazia) {
 
 		// Inserindo os campos na planilha gerencial
 		abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 9).setValues([intervaloInserir]);
+		InserirRedirecionamentoPlanilha(linhaVazia, colRedirectInteresseGerencial, urlInteresse, linhaAtual);
 
 		// Nova linha criada
 		return true;
@@ -179,8 +185,9 @@ function ImportarDadosMarcoZero(linhaAtual, linhaCampoGerencial, linhaVazia) {
 	// Pegando o campo se está cadastrada na planilha de interesse
 	const respondeuInteresseMarcoZero = valLinha[colRespondeuInteresseMarcoZero - 1];
 
-	// Se aquela pessoa já estava na planilha de interesse
-	if (respondeuInteresseMarcoZero == "SIM") {
+	// Se aquela pessoa já estiver na gerencial
+	if (linhaCampoGerencial) {
+		InserirRedirecionamentoPlanilha(linhaCampoGerencial, colRedirectMarcoZeroGerencial, urlMarcoZero, linhaAtual);
 		// Nenhuma linha criada
 		return false;
 	}
@@ -201,14 +208,15 @@ function ImportarDadosMarcoZero(linhaAtual, linhaCampoGerencial, linhaVazia) {
 
 		// Inserindo os campos na planilha gerencial
 		abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 8).setValues([intervaloInserir]);
+		InserirRedirecionamentoPlanilha(linhaVazia, colRedirectMarcoZeroGerencial, urlMarcoZero, linhaAtual);
 
-		// Pintando campos cidade e estado
-		abaGerencial.getRange(linhaVazia, colCidadeGerencial, 1, 1).setBackground("#eeeeee");
+		// Pintando campos cidade e estado e redirecionamento para interesse
+		abaGerencial.getRange(linhaVazia, colCidadeGerencial, 1, 2).setBackground("#eeeeee");
+		abaGerencial.getRange(linhaVazia, colRedirectInteresseGerencial).setBackground("#eeeeee");
 
 		// Nova linha criada
 		return true;
 	}
-
 	// Se a pessoa já estiver registrado na planilha gerencial mas não estiver na planilha de interesse
 	abaGerencial.getRange(linhaCampoGerencial, colRespondeuInteresseGerencial).setValue(respondeuInteresseMarcoZero);
 
@@ -242,6 +250,7 @@ function ImportarDadosEnvioMapa(linhaAtual, linhaCampoGerencial, linhaVazia) {
 	]
 
 	abaGerencial.getRange(linhaCampoGerencial, colLinkMapaGerencial, 1, 5).setValues([intervaloInserir]);
+	InserirRedirecionamentoPlanilha(linhaCampoGerencial, colRedirectEnvioMapaGerencial, urlEnvioMapa, linhaAtual);
 
 	// Nenhuma linha nova criada
 	return false;
@@ -267,6 +276,7 @@ function ImportarDadosMarcoFinal(linhaAtual, linhaCampoGerencial, linhaVazia) {
 	]
 
 	abaGerencial.getRange(linhaCampoGerencial, colRespondeuMarcoFinalGerencial, 1, 4).setValues([intervaloInserir]);
+	InserirRedirecionamentoPlanilha(linhaCampoGerencial, colRedirectMarcoFinalGerencial, urlMarcoFinal, linhaAtual);
 
 	// Nenhuma linha criada
 	return false;
@@ -296,6 +306,7 @@ function ImportarDadosCertificado(linhaAtual, linhaCampoGerencial, linhaVazia) {
 
 	abaGerencial.getRange(linhaCampoGerencial, colTerminouCursoGerencial).setValue("SIM");
 	abaGerencial.getRange(linhaCampoGerencial, colDataCertificadoGerencial, 1, 4).setValues([intervaloInserir]);
+	InserirRedirecionamentoPlanilha(linhaCampoGerencial, colRedirectCertificadoGerencial, urlCertificado, linhaAtual);
 
 	// Nenhuma linha criada
 	return false;
@@ -304,6 +315,22 @@ function ImportarDadosCertificado(linhaAtual, linhaCampoGerencial, linhaVazia) {
 // Função que irá lidar com pessoas que estão em formulários posteriores sem estar na de interesse ou marco zero
 function LidarComPessoaNaoCadastrada() {
 
+}
+
+// Função que adiciona um link para redirecionamento na planilha gerencial
+function InserirRedirecionamentoPlanilha(linhaInserir, colInserir, urlDestino, linhaDestino) {
+	// Expressão regular para extrair o ID da planilha e o ID da aba pelo link
+	const regex = /\/d\/([a-zA-Z0-9-_]+).*gid=([0-9]+)/;
+	const matches = urlDestino.match(regex);
+
+	if (!matches) return;
+
+	const planilhaID = matches[1];
+	const abaID = matches[2];
+	const urlRedirecionamento = `https://docs.google.com/spreadsheets/d/${planilhaID}/edit#gid=${abaID}&range=A${linhaDestino}`;
+
+	abaGerencial.getRange(linhaInserir, colInserir).setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
+	abaGerencial.getRange(linhaInserir, colInserir).setValue(urlRedirecionamento);
 }
 
 // Função que sincronizará quem entrou no whatsapp entre as três planilhas
@@ -332,34 +359,40 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 		// Se o email for encontrado na outra planilha
 		if (linhaCampoDesejada2) {
 			const celDesejada1 = abaDesejada1.getRange(i, colDesejada1);
-			const valDesejada1 = celDesejada1.getValue();
 			const celDesejada2 = abaDesejada2.getRange(linhaCampoDesejada2, colDesejada2);
-			const valDesejada2 = celDesejada2.getValue();
 
-			// Se o campo do Desejada1 estiver vazio, altere o campo do Desejada1 com o valor da outra planilha
-			if (!valDesejada1) {
-				celDesejada1.setValue(valDesejada2);
-				continue;
-			}
-
-			// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Desejada1
-			if (!valDesejada2) {
-				celDesejada2.setValue(valDesejada1);
-				continue;
-			}
-
-			// Se o campo do Desejada1 estiver como sim e da outra como não, altere o campo da outra planilha
-			if (valDesejada1 == "SIM" && valDesejada2 == "NÃO") {
-				celDesejada2.setValue("SIM");
-				continue;
-			}
-
-			// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Desejada1
-			if (valDesejada2 == "SIM" && valDesejada1 == "NÃO") {
-				celDesejada1.setValue("SIM");
-				continue;
-			}
+			CompararValoresEMarcar(celDesejada1, celDesejada2);
 		}
+	}
+}
+
+// Função genérica que compara dois campos que possam conter "SIM" ou "NÃO" e sincroniza eles
+function CompararValoresEMarcar(celDesejada1, celDesejada2) {
+	const valDesejada1 = celDesejada1.getValue();
+	const valDesejada2 = celDesejada2.getValue();
+
+	// Se o campo do Desejada1 estiver vazio, altere o campo do Desejada1 com o valor da outra planilha
+	if (!valDesejada1) {
+		celDesejada1.setValue(valDesejada2);
+		return;
+	}
+
+	// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Desejada1
+	if (!valDesejada2) {
+		celDesejada2.setValue(valDesejada1);
+		return;
+	}
+
+	// Se o campo do Desejada1 estiver como sim e da outra como não, altere o campo da outra planilha
+	if (valDesejada1 == "SIM" && valDesejada2 == "NÃO") {
+		celDesejada2.setValue("SIM");
+		return;
+	}
+
+	// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Desejada1
+	if (valDesejada2 == "SIM" && valDesejada1 == "NÃO") {
+		celDesejada1.setValue("SIM");
+		return;
 	}
 }
 

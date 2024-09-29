@@ -93,6 +93,11 @@ const colDataCertificadoGerencial = Coluna('U');
 const colLinkCertificadoGerencial = Coluna('V');
 const colLinkTestadoCertificadoGerencial = Coluna('W');
 const colEntrouGrupoCertificadoGerencial = Coluna('X');
+const colRedirectInteresseGerencial = Coluna('Y');
+const colRedirectMarcoZeroGerencial = Coluna('Z');
+const colRedirectEnvioMapaGerencial = Coluna('AA');
+const colRedirectMarcoFinalGerencial = Coluna('AB');
+const colRedirectCertificadoGerencial = Coluna('AC');
 
 
 // Variáveis de otimização (Possível futura implementação)
