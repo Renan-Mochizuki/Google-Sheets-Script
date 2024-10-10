@@ -35,7 +35,7 @@ function onOpen(e) {
 //    - pega todos os dados do Marco Final e move na Gerencial ou apenas atualiza os campos adicionais
 //    ImportarDadosCertificado(linhaAtual, linhaCampoGerencial, linhaVazia):
 //    - pega todos os dados do Certificado e move na Gerencial ou apenas atualiza os campos adicionais
-//    LidarComPessoaNaoCadastrada():
+//    LidarComPessoaNaoCadastrada(linhaAtual, linhaVazia, abaDesejada):
 //    - função genérica para lidar com pessoas que estão em formulários posteriores sem estar na de interesse ou marco zero   
 //    InserirRedirecionamentoPlanilha(linhaAtual, colInserir, urlInteresse, linhaDestino):
 //    - insere um link em um campo para um campo específico em outra planilha
@@ -66,12 +66,13 @@ function onOpen(e) {
 function RetornarLinhaEmailPlanilha(emailProcurado, abaDesejada) {
 	// Pegar variáveis da planilha desejada
 	const { ultimaLinha, colEmail } = objetoMap.get(abaDesejada) || {};
+	// Pegando todos os emails
+	const emails = abaDesejada.getRange(2, colEmail, ultimaLinha, 1).getValue();
 
 	//Conferir todos os emails da planilha desejada
-	for (let i = 2; i <= ultimaLinha; i++) {
-		const email = abaDesejada.getRange(i, colEmail).getValue();
-
-		if (emailProcurado == email) return i;
+	for (let i = 0; i <= ultimaLinha - 2; i++) {
+		Logger.log(emails[i][0]);
+		if (emailProcurado == emails[i][0]) return i;
 	}
 	// Se não for encontrado nenhum 
 	return false;
@@ -286,7 +287,7 @@ function ImportarDadosMarcoFinal(linhaAtual, linhaCampoGerencial, linhaVazia) {
 function ImportarDadosCertificado(linhaAtual, linhaCampoGerencial, linhaVazia) {
 	// Se aquele email ainda não estiver registrado na planilha gerencial
 	if (!linhaCampoGerencial) {
-		LidarComPessoaNaoCadastrada(linhaAtual);
+		LidarComPessoaNaoCadastrada(linhaAtual, linhaVazia, abaCertificado);
 		return false;
 	}
 
@@ -313,7 +314,7 @@ function ImportarDadosCertificado(linhaAtual, linhaCampoGerencial, linhaVazia) {
 }
 
 // Função que irá lidar com pessoas que estão em formulários posteriores sem estar na de interesse ou marco zero
-function LidarComPessoaNaoCadastrada() {
+function LidarComPessoaNaoCadastrada(linhaAtual, linhaVazia, abaDesejada) {
 
 }
 

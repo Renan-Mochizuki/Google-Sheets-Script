@@ -6,15 +6,15 @@ function LimparPlanilha() {
 	// const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos?', ui.ButtonSet.YES_NO);
 
 	// if (response == ui.Button.YES) {
-		// Verifica se há mais de uma linha para limpar
-		// if (ultimaLinhaAtiva > 1) {
-			// Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
-			const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
+	// Verifica se há mais de uma linha para limpar
+	// if (ultimaLinhaAtiva > 1) {
+	// Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
+	const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
 
-			// Limpa o conteúdo do intervalo selecionado
-			planilha.clearContent();
-			planilha.setBackground('#ffffff');
-		// }
+	// Limpa o conteúdo do intervalo selecionado
+	planilha.clearContent();
+	planilha.setBackground('#ffffff');
+	// }
 	// }
 }
 
@@ -85,5 +85,18 @@ function RemoverLinhasVazias() {
 		if (!emailAtiva) {
 			abaAtiva.deleteRow(i);
 		}
+	}
+}
+
+// Função para preencher o campo do estado a partir do campo cidade
+function PreencherEstado() {
+	// Atribui os variáveis de acordo com a abaDesejada
+	const { colCidade, colEstado } = objetoMap.get(abaAtiva) || {};
+	Logger.log(colCidade, colEstado);
+	// Loop das linhas
+	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
+		const cidade = abaAtiva.getRange(i, colCidade).getValue();
+		
+		abaAtiva.getRange(i, colEstado).setValue(estado);
 	}
 }
