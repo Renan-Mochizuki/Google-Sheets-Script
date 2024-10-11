@@ -82,7 +82,8 @@ function RetornarLinhaEmailPlanilha(emailProcurado, abaDesejada) {
 function RetornarLinhaEmailDados(emailProcurado, dados) {
 	//Conferir todos os emails da planilha desejada
 	for (let i = 0; i < dados.length; i++) {
-		if (emailProcurado == dados[i][0]) return i;
+		// Se o email for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
+		if (emailProcurado == dados[i]) return i + 2;
 	}
 	// Se não for encontrado nenhum 
 	return false;
@@ -94,31 +95,36 @@ function Importar() {
 	const tituloToast = 'Executando funções';
 	let linhaVazia, linhasAfetadas, totalLinhasAfetadas = 0;
 	// Chamando funções das planilhas para atualizar seus campos
-	planilhaAtiva.toast('Sincronizando campos Whats', tituloToast, tempoNotificacao);
-	SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
-	// Verifica na planilha Interesse, quem respondeu o Marco Zero, e verifica na planilha Marco Zero, quem respondeu o Interesse
-	planilhaAtiva.toast('Verificando respostas Marco Zero', tituloToast, tempoNotificacao);
-	VerificarEMarcarCadastroOutraPlanilha(abaInteresse, colRespondeuMarcoZeroInteresse, abaMarcoZero);
-	planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
-	VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
+	// planilhaAtiva.toast('Sincronizando campos Whats', tituloToast, tempoNotificacao);
+	// SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
+	// // Verifica na planilha Interesse, quem respondeu o Marco Zero, e verifica na planilha Marco Zero, quem respondeu o Interesse
+	// planilhaAtiva.toast('Verificando respostas Marco Zero', tituloToast, tempoNotificacao);
+	// VerificarEMarcarCadastroOutraPlanilha(abaInteresse, colRespondeuMarcoZeroInteresse, abaMarcoZero);
+	// planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
+	// VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
 
 	planilhaAtiva.toast('Importando dados da Interesse', tituloToast, tempoNotificacao);
 	({ linhaVazia, linhasAfetadas } = ImportarDados(abaInteresse));
 	totalLinhasAfetadas += linhasAfetadas;
+
 	planilhaAtiva.toast('Importando dados do Marco Zero', tituloToast, tempoNotificacao);
 	({ linhaVazia, linhasAfetadas } = ImportarDados(abaMarcoZero));
 	totalLinhasAfetadas += linhasAfetadas;
-	planilhaAtiva.toast('Importando dados do Envio de Mapa', tituloToast, tempoNotificacao);
-	({ linhaVazia, linhasAfetadas } = ImportarDados(abaEnvioMapa));
-	totalLinhasAfetadas += linhasAfetadas;
-	planilhaAtiva.toast('Importando dados do Marco Final', tituloToast, tempoNotificacao);
-	({ linhaVazia, linhasAfetadas } = ImportarDados(abaMarcoFinal));
-	totalLinhasAfetadas += linhasAfetadas;
-	planilhaAtiva.toast('Importando dados do Envio do Certificado', tituloToast, tempoNotificacao);
-	({ linhaVazia, linhasAfetadas } = ImportarDados(abaCertificado));
-	totalLinhasAfetadas += linhasAfetadas;
-	let linhasCriadas = linhaVazia - ultimaLinhaGerencial - 1;
-	let mensagem = 'Fim da execução.\n' + linhasCriadas + ' linhas criadas\n' + totalLinhasAfetadas + ' linhas afetadas';
+
+	// planilhaAtiva.toast('Importando dados do Envio de Mapa', tituloToast, tempoNotificacao);
+	// ({ linhaVazia, linhasAfetadas } = ImportarDados(abaEnvioMapa));
+	// totalLinhasAfetadas += linhasAfetadas;
+
+	// planilhaAtiva.toast('Importando dados do Marco Final', tituloToast, tempoNotificacao);
+	// ({ linhaVazia, linhasAfetadas } = ImportarDados(abaMarcoFinal));
+	// totalLinhasAfetadas += linhasAfetadas;
+
+	// planilhaAtiva.toast('Importando dados do Envio do Certificado', tituloToast, tempoNotificacao);
+	// ({ linhaVazia, linhasAfetadas } = ImportarDados(abaCertificado));
+	// totalLinhasAfetadas += linhasAfetadas;
+
+	const linhasCriadas = linhaVazia - ultimaLinhaGerencial - 1;
+	const mensagem = 'Fim da execução.\n' + linhasCriadas + ' linhas criadas\n' + totalLinhasAfetadas + ' linhas afetadas';
 	planilhaAtiva.toast(mensagem, 'Execução finalizada', tempoNotificacao + 5);
 
 }
@@ -133,12 +139,13 @@ function ImportarDados(abaDesejada) {
 	const { ultimaLinhaAnalisada, ultimaLinha, colEmail, ImportarDadosPlanilha } = objetoMap.get(abaDesejada) || {};
 
 	// Pegando todos os emails da abaGerencial
-	const emails = abaGerencial.getRange(2, colEmailGerencial, ultimaLinhaGerencial, 1).getValues();
-
+	const emails = abaGerencial.getRange(2, colEmailGerencial, ultimaLinhaGerencial, 1).getValues().flat();
+	Logger.log('ultimaLinhaGerencial: '+ ultimaLinhaGerencial);
+	Logger.log('emails: '+emails);
 	// Loop da planilha Desejada
 	for (let i = ultimaLinhaAnalisada; i <= ultimaLinha; i++) {
 		const email = abaDesejada.getRange(i, colEmail).getValue();
-
+		if(abaDesejada == abaMarcoZero) Logger.log(emails)
 		// Se não existir email, passe para o próximo
 		if (!email) continue;
 		const linhaCampoGerencial = RetornarLinhaEmailDados(email, emails);
@@ -147,7 +154,8 @@ function ImportarDados(abaDesejada) {
 
 		if (novoEmailCriado) {
 			linhaVazia++
-			emails.push([novoEmailCriado]);
+			// Insira o novo email na array de emails (Se o primeiro item estiver vazio, substitua ele)
+			emails[0] ? emails.push(novoEmailCriado) : (emails[0] = novoEmailCriado);
 		}
 		else linhasAfetadas++;
 	}
@@ -336,7 +344,7 @@ function ImportarDadosCertificado(linhaAtual, linhaCampoGerencial, linhaVazia) {
 function LidarComPessoaNaoCadastrada(linhaAtual, linhaVazia, abaDesejada) {
 	// Pegando os valores da linha
 	const email = abaCertificado.getRange(linhaAtual, colEmailCertificado).getValue();
-	Logger.log(email);
+	Logger.log('Email não cadastrado: ' + email);
 }
 
 // Função que adiciona um link para redirecionamento na planilha gerencial
@@ -372,7 +380,7 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 	const { ultimaLinha: ultimaLinha2, colEmail: colEmail2 } = objetoMap.get(abaDesejada2) || {};
 
 	// Pegando todos os emails da abaDesejada2
-	const emails = abaDesejada2.getRange(2, colEmail2, ultimaLinha2, 1).getValues();
+	const emails = abaDesejada2.getRange(2, colEmail2, ultimaLinha2, 1).getValues().flat();
 
 	for (let i = 2; i <= ultimaLinha1; i++) {
 		const emailDesejada1 = abaDesejada1.getRange(i, colEmail1).getValue();
@@ -430,7 +438,7 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
 	const { ultimaLinha: ultimaLinhaRegistro, colEmail: colEmailRegistro } = objetoMap.get(abaParaRegistro) || {};
 	const { ultimaLinha: ultimaLinhaVerificar, colEmail: colEmailVerificar } = objetoMap.get(abaParaVerificar) || {};
 
-	const emailsAbaParaVerificar = abaParaVerificar.getRange(2, colEmailVerificar, ultimaLinhaVerificar, 1).getValues();
+	const emailsAbaParaVerificar = abaParaVerificar.getRange(2, colEmailVerificar, ultimaLinhaVerificar, 1).getValues().flat();
 
 	//Pegar o email na planilha Desejada
 	for (let i = 2; i <= ultimaLinhaRegistro; i++) {
@@ -456,14 +464,17 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
 }
 
 
+function VerificarRepeticoesGerencial() {
+	VerificarRepeticoes(abaGerencial)
+}
+
 function VerificarRepeticoes(abaDesejada) {
-	const { ultimaLinha, colEmail } = objetoMap.get(abaParaRegistro) || {};
-	const emails = abaDesejada.getRange(2, colEmail, ultimaLinha, 1).getValues();
-	const arrayEmails = emails.flat();
+	const { ultimaLinha, colEmail } = objetoMap.get(abaDesejada) || {};
+	const emails = abaDesejada.getRange(2, colEmail, ultimaLinha, 1).getValues().flat();
 
 	for (let i = 0; i < emails.length; i++) {
-		const email = arrayEmails[i];
-		if (arrayEmails.indexOf(email) !== i) {
+		const email = emails[i];
+		if (emails.indexOf(email) !== i) {
 			Logger.log(email);
 		}
 	}
