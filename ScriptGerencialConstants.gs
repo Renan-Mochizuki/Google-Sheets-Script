@@ -99,6 +99,8 @@ const colRedirectEnvioMapaGerencial = Coluna('AA');
 const colRedirectMarcoFinalGerencial = Coluna('AB');
 const colRedirectCertificadoGerencial = Coluna('AC');
 
+// Outras variáveis
+const tempoNotificacao = 30;
 
 // Variáveis de otimização (Possível futura implementação)
 // Ideia: Armazenar a ultima linha analisada para reduzir o tamanho do loop, assim evitando analisar toda vez campos já analisados
@@ -160,70 +162,100 @@ const colTelAtiva = colTelGeral;
 // Objeto para mapear as variáveis para cada aba, para que seja possível utilizar o argumento da aba desejada
 const objetoMap = new Map([
     [abaInteresse, {
+        nome: 'Interesse',
+        url: urlInteresse,
         ultimaLinhaAnalisada: ultimaLinhaAnalisadaInteresse,
         ultimaLinha: ultimaLinhaInteresse,
+        ultimaColuna: ultimaColunaInteresse,
+        colNome: colNomeInteresse,
         colEmail: colEmailInteresse,
+        colTel: colTelInteresse,
         colCidade: colCidadeInteresse,
         colEstado: colEstadoInteresse,
         ImportarDadosPlanilha: ImportarDadosInteresse
     }],
     [abaMarcoZero, {
+        nome: 'Marco Zero',
+        url: urlMarcoZero,
         ultimaLinhaAnalisada: ultimaLinhaAnalisadaMarcoZero,
         ultimaLinha: ultimaLinhaMarcoZero,
+        ultimaColuna: ultimaColunaMarcoZero,
+        colNome: colNomeMarcoZero,
         colEmail: colEmailMarcoZero,
+        colTel: colTelMarcoZero,
         ImportarDadosPlanilha: ImportarDadosMarcoZero
     }],
     [abaEnvioMapa, {
+        nome: 'Envio do Mapa',
+        url: urlEnvioMapa,
         ultimaLinhaAnalisada: ultimaLinhaAnalisadaEnvioMapa,
         ultimaLinha: ultimaLinhaEnvioMapa,
+        ultimaColuna: ultimaColunaEnvioMapa,
+        colNome: colNomeEnvioMapa,
         colEmail: colEmailEnvioMapa,
+        colTel: colTelEnvioMapa,
         ImportarDadosPlanilha: ImportarDadosEnvioMapa
     }],
     [abaMarcoFinal, {
+        nome: 'Marco Final',
+        url: urlMarcoFinal,
         ultimaLinhaAnalisada: ultimaLinhaAnalisadaMarcoFinal,
         ultimaLinha: ultimaLinhaMarcoFinal,
+        ultimaColuna: ultimaColunaMarcoFinal,
+        colNome: colNomeMarcoFinal,
         colEmail: colEmailMarcoFinal,
+        colTel: colTelMarcoFinal,
         ImportarDadosPlanilha: ImportarDadosMarcoFinal
     }],
     [abaCertificado, {
+        nome: 'Envio do Certificado',
+        url: urlCertificado,
         ultimaLinhaAnalisada: ultimaLinhaAnalisadaCertificado,
         ultimaLinha: ultimaLinhaCertificado,
+        ultimaColuna: ultimaColunaCertificado,
+        colNome: colNomeCertificado,
         colEmail: colEmailCertificado,
+        colTel: colTelCertificado,
         ImportarDadosPlanilha: ImportarDadosCertificado
     }],
     [abaGerencial, {
+        nome: 'Gerencial',
+        url: urlGerencial,
         ultimaLinha: ultimaLinhaGerencial,
+        ultimaColuna: ultimaColunaGerencial,
+        colNome: colNomeGerencial,
         colEmail: colEmailGerencial,
+        colTel: colTelGerencial,
         colCidade: colCidadeGerencial,
         colEstado: colEstadoGerencial
     }]
 ]);
 
 const estados = [
-    "Amapá – AP",
-    "Amazonas – AM",
-    "Bahia – BA",
-    "Ceará – CE",
-    "Distrito Federal – DF",
-    "Espírito Santo – ES",
-    "Goiás – GO",
-    "Maranhão – MA",
-    "Mato Grosso – MT",
-    "Mato Grosso do Sul – MS",
-    "Minas Gerais – MG",
-    "Pará – PA",
-    "Paraíba – PB",
-    "Paraná – PR",
-    "Pernambuco – PE",
-    "Piauí – PI",
-    "Rio de Janeiro – RJ",
-    "Rio Grande do Norte – RN",
-    "Rio Grande do Sul – RS",
-    "Rondônia – RO",
-    "Roraima – RR",
-    "Santa Catarina – SC",
-    "São Paulo – SP",
-    "Sergipe – SE",
-    "Tocantins – TO",
+    "Amapá - AP",
+    "Amazonas - AM",
+    "Bahia - BA",
+    "Ceará - CE",
+    "Distrito Federal - DF",
+    "Espírito Santo - ES",
+    "Goiás - GO",
+    "Maranhão - MA",
+    "Mato Grosso - MT",
+    "Mato Grosso do Sul - MS",
+    "Minas Gerais - MG",
+    "Pará - PA",
+    "Paraíba - PB",
+    "Paraná - PR",
+    "Pernambuco - PE",
+    "Piauí - PI",
+    "Rio de Janeiro - RJ",
+    "Rio Grande do Norte - RN",
+    "Rio Grande do Sul - RS",
+    "Rondônia - RO",
+    "Roraima - RR",
+    "Santa Catarina - SC",
+    "São Paulo - SP",
+    "Sergipe - SE",
+    "Tocantins - TO",
     "Internacional"
 ];
