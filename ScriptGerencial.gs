@@ -10,7 +10,8 @@ function onOpen(e) {
 		.addSubMenu(ui.createMenu('Formatação da planilha')
 			.addItem('Formatar campos telefone', 'FormatarLinhasTelefone')
 			.addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
-			.addItem('Remover linhas vazias', 'RemoverLinhasVazias'))
+			.addItem('Remover linhas vazias', 'RemoverLinhasVazias')
+			.addItem('Ocultar Linhas', 'mostrarInterfaceComCheckboxes'))
 		.addToUi();
 }
 
@@ -67,8 +68,10 @@ function onOpen(e) {
 function RetornarLinhaEmailDados(emailProcurado, dados) {
 	//Conferir todos os emails da planilha desejada
 	for (let i = 0; i < dados.length; i++) {
+		if (!dados[i] || typeof dados[i] !== 'string') continue;
+
 		// Se o email for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-		if (emailProcurado == dados[i]) return i + 2;
+		if (emailProcurado.toLowerCase() == dados[i].toLowerCase()) return i + 2;
 	}
 	// Se não for encontrado nenhum 
 	return false;
@@ -87,21 +90,21 @@ function Importar() {
 	// planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
 	// VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
-	({ linhaVazia, linhasAfetadas } = ImportarDados(abaInteresse));
-	totalLinhasAfetadas += linhasAfetadas;
+	// planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
+	// ({ linhaVazia, linhasAfetadas } = ImportarDados(abaInteresse));
+	// totalLinhasAfetadas += linhasAfetadas;
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
-	({ linhaVazia, linhasAfetadas } = ImportarDados(abaMarcoZero));
-	totalLinhasAfetadas += linhasAfetadas;
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
+	// ({ linhaVazia, linhasAfetadas } = ImportarDados(abaMarcoZero));
+	// totalLinhasAfetadas += linhasAfetadas;
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
-	({ linhaVazia, linhasAfetadas } = ImportarDados(abaEnvioMapa));
-	totalLinhasAfetadas += linhasAfetadas;
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
+	// ({ linhaVazia, linhasAfetadas } = ImportarDados(abaEnvioMapa));
+	// totalLinhasAfetadas += linhasAfetadas;
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
-	({ linhaVazia, linhasAfetadas } = ImportarDados(abaMarcoFinal));
-	totalLinhasAfetadas += linhasAfetadas;
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
+	// ({ linhaVazia, linhasAfetadas } = ImportarDados(abaMarcoFinal));
+	// totalLinhasAfetadas += linhasAfetadas;
 
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
 	({ linhaVazia, linhasAfetadas } = ImportarDados(abaCertificado));
@@ -221,8 +224,9 @@ function ImportarDadosMarcoZero(linhaAtual, linhaCampoGerencial, linhaVazia) {
 		abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 8).setValues([intervaloInserir]);
 		InserirRedirecionamentoPlanilha(linhaVazia, colRedirectMarcoZeroGerencial, urlMarcoZero, linhaAtual);
 
-		// Pintando campos cidade e estado e redirecionamento para interesse
+		// Pintando campos cidade e estado, situação e redirecionamento para interesse
 		abaGerencial.getRange(linhaVazia, colCidadeGerencial, 1, 2).setBackground("#eeeeee");
+		abaGerencial.getRange(linhaVazia, colSituacaoGerencial).setBackground("#eeeeee");
 		abaGerencial.getRange(linhaVazia, colRedirectInteresseGerencial).setBackground("#eeeeee");
 
 		// Nova linha criada
@@ -343,7 +347,11 @@ function LidarComPessoaNaoCadastrada(linhaAtual, linhaVazia, abaDesejada) {
 
 	abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 3).setValues([intervaloInserir]);
 
-	return ImportarDadosPlanilha(linhaAtual, linhaVazia, linhaVazia + 1);
+	// Preencher os outros dados da planilha
+	ImportarDadosPlanilha(linhaAtual, linhaVazia, linhaVazia + 1);
+
+	// Nova linha criada
+	return true;
 }
 
 // Função que adiciona um link para redirecionamento na planilha gerencial

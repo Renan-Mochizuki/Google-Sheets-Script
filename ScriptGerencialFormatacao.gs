@@ -96,7 +96,33 @@ function PreencherEstado() {
 	// Loop das linhas
 	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
 		const cidade = abaAtiva.getRange(i, colCidade).getValue();
-		
+
 		abaAtiva.getRange(i, colEstado).setValue(estado);
+	}
+}
+
+function mostrarInterfaceComCheckboxes() {
+  var html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes')
+      .setWidth(400)
+      .setHeight(300);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
+}
+
+function processarEscolhas(escolhas) {
+	planilhaAtiva.toast('ativo', 'ativo', tempoNotificacao);
+	EsconderLinhas(abaGerencial, colTerminouCursoGerencial, "SIM")
+  }
+
+function EsconderLinhas(abaDesejada, colDesejada, valorAMostrar) {
+
+	const { ultimaLinha } = objetoMap.get(abaDesejada) || {};
+
+	const valColunas = abaDesejada.getRange(2, colDesejada, ultimaLinha, 1).getValues().flat();
+
+	
+	for (let i = 0; i < valColunas.length; i++) {
+		if (valColunas[i] != valorAMostrar) {
+			abaDesejada.hideRows(i + 2);
+		}
 	}
 }
