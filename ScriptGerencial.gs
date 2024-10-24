@@ -11,7 +11,8 @@ function onOpen(e) {
 			.addItem('Formatar campos telefone', 'FormatarLinhasTelefone')
 			.addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
 			.addItem('Remover linhas vazias', 'RemoverLinhasVazias')
-			.addItem('Ocultar Linhas', 'mostrarInterfaceComCheckboxes'))
+			.addItem('Mostrar todas linhas', 'MostrarTodasLinhas')
+			.addItem('Esconder linhas', 'mostrarInterfaceComCheckboxes'))
 		.addToUi();
 }
 

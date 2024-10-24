@@ -228,6 +228,13 @@ const objetoMap = new Map([
         colTel: colTelGerencial,
         colCidade: colCidadeGerencial,
         colEstado: colEstadoGerencial
+    }],
+    [abaAtiva,{
+        nome: 'Ativa',
+        ultimaLinha: ultimaLinhaAtiva,
+        ultimaColuna: ultimaColunaAtiva,
+        colEmail: colEmailAtiva,
+        colTel: colTelAtiva
     }]
 ]);
 

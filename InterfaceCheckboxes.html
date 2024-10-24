@@ -41,12 +41,13 @@
             var escolhas = Array.from(checkboxes).map(cb => cb.value);
 
             // Enviar escolhas para o código do Google Apps Script
-            google.script.run.withFailureHandler(error => {
+            google.script.run.withSuccessHandler(response => {
+                // Fechar a interface
+                google.script.host.close();
+            }).withFailureHandler(error => {
                 alert("Erro: Tente abrir a planilha na guia anônima\n" + error.message);
             }).processarEscolhas(escolhas);
 
-            // Fechar a interface
-            google.script.host.close();
         }
         function selecionarTudo() {
             var checkboxes = document.querySelectorAll('input[name="opcoes"]');

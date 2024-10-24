@@ -102,27 +102,33 @@ function PreencherEstado() {
 }
 
 function mostrarInterfaceComCheckboxes() {
-  var html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes')
-      .setWidth(400)
-      .setHeight(300);
-  SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
+	var html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes')
+		.setWidth(400)
+		.setHeight(300);
+	SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
 }
 
 function processarEscolhas(escolhas) {
 	planilhaAtiva.toast('ativo', 'ativo', tempoNotificacao);
-	EsconderLinhas(abaGerencial, colTerminouCursoGerencial, "SIM")
-  }
+	EsconderLinhas(colTerminouCursoGerencial, "SIM")
+}
 
-function EsconderLinhas(abaDesejada, colDesejada, valorAMostrar) {
+function EsconderLinhas(colDesejada, valorAMostrar) {
 
-	const { ultimaLinha } = objetoMap.get(abaDesejada) || {};
+	const { ultimaLinha } = objetoMap.get(abaAtiva) || {};
 
-	const valColunas = abaDesejada.getRange(2, colDesejada, ultimaLinha, 1).getValues().flat();
+	const valColunas = abaAtiva.getRange(2, colDesejada, ultimaLinha, 1).getValues().flat();
 
-	
+
 	for (let i = 0; i < valColunas.length; i++) {
 		if (valColunas[i] != valorAMostrar) {
-			abaDesejada.hideRows(i + 2);
+			abaAtiva.hideRows(i + 2);
 		}
 	}
+}
+
+function MostrarTodasLinhas() {
+	const { ultimaLinha } = objetoMap.get(abaAtiva) || {};
+
+	abaAtiva.showRows(2, ultimaLinha);
 }
