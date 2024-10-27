@@ -35,6 +35,7 @@ function CompletarVaziosComNao() {
 	}
 }
 
+// Função que recebe um telefone digitado e retorna o telefone formatado
 function FormatarTelefone(textoTelefone) {
 	// Remove todos os caracteres não numéricos, exceto o '+'
 	let telefoneNumeros = textoTelefone.toString().replace(/[^\d+]/g, '');
@@ -65,6 +66,7 @@ function FormatarTelefone(textoTelefone) {
 	return telefoneNumeros;
 }
 
+// Função que usa a função FormatarTelefone para formatar todos os campos da planilha ativa
 function FormatarLinhasTelefone() {
 	// Loop das linhas
 	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
@@ -90,8 +92,8 @@ function RemoverLinhasVazias() {
 
 // Função para preencher o campo do estado a partir do campo cidade
 function PreencherEstado() {
-	// Atribui os variáveis de acordo com a abaDesejada
-	const { colCidade, colEstado } = objetoMap.get(abaAtiva) || {};
+	// Atribui os variáveis de acordo com a abaAtiva
+	const { colCidade, colEstado } = objetoMap.get(abaAtiva);
 	Logger.log(colCidade, colEstado);
 	// Loop das linhas
 	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
@@ -101,34 +103,37 @@ function PreencherEstado() {
 	}
 }
 
-function mostrarInterfaceComCheckboxes() {
-	var html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes')
-		.setWidth(400)
-		.setHeight(300);
+// Função que exibe o HTML da interface com checkboxes para escolher quem quer esconder
+function MostrarInterfaceEsconderLinhas() {
+	const html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes').setWidth(400).setHeight(300);
 	SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
 }
 
-function processarEscolhas(escolhas) {
-	planilhaAtiva.toast('ativo', 'ativo', tempoNotificacao);
+// Função que recebe as escolhas feitas na interface e chama a função EsconderLinhas como necessário
+function ProcessarEscolhasEsconderLinhas(escolhas) {
 	EsconderLinhas(colTerminouCursoGerencial, "SIM")
 }
 
+// Função que esconde todas as linhas que possuem um certo valor em uma coluna
 function EsconderLinhas(colDesejada, valorAMostrar) {
+	// Atribui os variáveis de acordo com a abaAtiva
+	const { ultimaLinha } = objetoMap.get(abaAtiva);
 
-	const { ultimaLinha } = objetoMap.get(abaAtiva) || {};
-
+	// Pega todos os valores da coluna desejada
 	const valColunas = abaAtiva.getRange(2, colDesejada, ultimaLinha, 1).getValues().flat();
 
-
+	// Loop que percorre todos valores da coluna
 	for (let i = 0; i < valColunas.length; i++) {
+		// Se o valor da coluna for diferente do valorAMostrar, esconde a linha
 		if (valColunas[i] != valorAMostrar) {
 			abaAtiva.hideRows(i + 2);
 		}
 	}
 }
 
+// Função que revela todas as linhas escondidas
 function MostrarTodasLinhas() {
-	const { ultimaLinha } = objetoMap.get(abaAtiva) || {};
-
+	// Atribui as variáveis de acordo com a abaAtiva
+	const { ultimaLinha } = objetoMap.get(abaAtiva);
 	abaAtiva.showRows(2, ultimaLinha);
 }

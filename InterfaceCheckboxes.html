@@ -46,7 +46,7 @@
                 google.script.host.close();
             }).withFailureHandler(error => {
                 alert("Erro: Tente abrir a planilha na guia anônima\n" + error.message);
-            }).processarEscolhas(escolhas);
+            }).ProcessarEscolhasEsconderLinhas(escolhas);
 
         }
         function selecionarTudo() {

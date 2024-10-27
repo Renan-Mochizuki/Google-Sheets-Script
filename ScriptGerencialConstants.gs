@@ -7,11 +7,6 @@ function Coluna(letras) {
     return numero;
 }
 
-// Para melhorar a performance, foi utilizado intervalos, por isso é necessário que os campos dessas planilhas estejam na ordem descrita:
-// Gerencial:
-// -Nome, Email, Telefone, Cidade, Estado, Whats, RespondeuInteresse, Respondeu MarcoZero, Situacao
-
-
 // Colunas Gerais
 const colNomeGeral = Coluna('C');
 const colEmailGeral = Coluna('D');
@@ -104,6 +99,7 @@ const tempoNotificacao = 30;
 
 // Variáveis de otimização (Possível futura implementação)
 // Ideia: Armazenar a ultima linha analisada para reduzir o tamanho do loop, assim evitando analisar toda vez campos já analisados
+// Essa ideia requer muito cuidado
 const ultimaLinhaAnalisadaInteresse = 2;
 const ultimaLinhaAnalisadaMarcoZero = 2;
 const ultimaLinhaAnalisadaEnvioMapa = 2;
@@ -111,33 +107,23 @@ const ultimaLinhaAnalisadaMarcoFinal = 2;
 const ultimaLinhaAnalisadaCertificado = 2;
 const ultimaLinhaAnalisadaWhatsGerencial = 2;
 
-// -- Links das planilhas no arquivo Links
+// -- Links das planilhas estão no arquivo Links
 
-// Seleciona a planilha de Confirmação de Interesse e a aba
+// Seleciona as planilhas e a aba
 const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
 const abaInteresse = planilhaInteresse.getSheets()[0]
-
-// Seleciona a planilha do Marco Zero e a aba
 const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
 const abaMarcoZero = planilhaMarcoZero.getSheets()[0]
-
-// Seleciona a planilha do Envio do Mapa e a aba
 const planilhaEnvioMapa = SpreadsheetApp.openByUrl(urlEnvioMapa);
 const abaEnvioMapa = planilhaEnvioMapa.getSheets()[0]
-
-// Seleciona a planilha do Marco Final e a aba
 const planilhaMarcoFinal = SpreadsheetApp.openByUrl(urlMarcoFinal);
 const abaMarcoFinal = planilhaMarcoFinal.getSheets()[0]
-
-// Seleciona a planilha do Envio do Certificado e a aba
 const planilhaCertificado = SpreadsheetApp.openByUrl(urlCertificado);
 const abaCertificado = planilhaCertificado.getSheets()[0]
-
-// Seleciona a planilha Gerencial e a aba
 const planilhaGerencial = SpreadsheetApp.getActiveSpreadsheet();
 const abaGerencial = planilhaGerencial.getSheets()[0]
 
-// Captura as últimas linhas
+// Captura as últimas linhas e colunas
 const ultimaLinhaInteresse = abaInteresse.getLastRow();
 const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
 const ultimaLinhaEnvioMapa = abaEnvioMapa.getLastRow();
@@ -156,10 +142,11 @@ const planilhaAtiva = SpreadsheetApp.getActiveSpreadsheet();
 const abaAtiva = planilhaAtiva.getSheets()[0]
 const ultimaLinhaAtiva = abaAtiva.getLastRow();
 const ultimaColunaAtiva = abaAtiva.getLastColumn();
+const colNomeAtiva = colNomeGeral;
 const colEmailAtiva = colEmailGeral;
 const colTelAtiva = colTelGeral;
 
-// Objeto para mapear as variáveis para cada aba, para que seja possível utilizar o argumento da aba desejada
+// Objeto que permite generalizar o código, passando a aba para o objeto, assim extraindo as variáveis respectivas da aba
 const objetoMap = new Map([
     [abaInteresse, {
         nome: 'Interesse',
@@ -233,6 +220,7 @@ const objetoMap = new Map([
         nome: 'Ativa',
         ultimaLinha: ultimaLinhaAtiva,
         ultimaColuna: ultimaColunaAtiva,
+        colNome: colNomeAtiva,
         colEmail: colEmailAtiva,
         colTel: colTelAtiva
     }]
