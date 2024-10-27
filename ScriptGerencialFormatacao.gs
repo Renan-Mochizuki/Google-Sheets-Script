@@ -1,34 +1,34 @@
-// -- Funções de formatação da planilha gerencial --
+// -- Funções de formatação da planilha --
 
 // Função para limpar toda a planilha
 function LimparPlanilha() {
 	// Janela de diálogo de confirmação da ação
-	const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos?', ui.ButtonSet.YES_NO);
+	// const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos?', ui.ButtonSet.YES_NO);
 
-	if (response == ui.Button.YES) {
-		// Verifica se há mais de uma linha para limpar
-		if (ultimalinhaGerencial > 1) {
-			// Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
-			const planilha = abaGerencial.getRange(2, 1, ultimalinhaGerencial - 1, ultimaColunaGerencial);
+	// if (response == ui.Button.YES) {
+	// Verifica se há mais de uma linha para limpar
+	// if (ultimaLinhaAtiva > 1) {
+	// Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
+	const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
 
-			// Limpa o conteúdo do intervalo selecionado
-			planilha.clearContent();
-			planilha.setBackground('#ffffff');
-		}
-	}
+	// Limpa o conteúdo do intervalo selecionado
+	planilha.clearContent();
+	planilha.setBackground('#ffffff');
+	// }
+	// }
 }
 
-// Função que completa todos os campos vazios adicionais com NÃO
+// Função que completa campos vazios adicionais da planilha gerencial com NÃO
 function CompletarVaziosComNao() {
-	// Loop das colunas
-	for (let j = colWhatsGerencial; j <= ultimaColunaGerencial; j++) {
+	const colunas = [colWhatsGerencial, colRespondeuInteresseGerencial, colRespondeuMarcoZeroGerencial, colRespondeuMarcoFinalGerencial, colEnviouReflexaoMarcoFinalGerencial];
 
-		// Se a coluna for a de situação, pule
-		if (j == colSituacaoGerencial) continue;
+	// Loop das colunas
+	for (let j = 0; j < colunas.length; j++) {
+		const coluna = colunas[j];
 
 		// Loop das linhas
-		for (let i = 2; i <= ultimalinhaGerencial; i++) {
-			const celula = abaGerencial.getRange(i, j)
+		for (let i = 2; i <= ultimaLinhaGerencial; i++) {
+			const celula = abaGerencial.getRange(i, coluna)
 			const valor = celula.getValue();
 			if (!valor) celula.setValue("NÃO");
 		}
@@ -67,23 +67,68 @@ function FormatarTelefone(textoTelefone) {
 
 function FormatarLinhasTelefone() {
 	// Loop das linhas
-	for (let i = 2; i <= ultimalinhaGerencial; i++) {
-		const valorTelefone = abaGerencial.getRange(i, colTelGerencial).getValue();
+	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
+		const valorTelefone = abaAtiva.getRange(i, colTelAtiva).getValue();
 
 		// Se o campo estiver vazio, passe para o próximo
 		if (!valorTelefone) continue;
 
 		const telefoneFormatado = FormatarTelefone(valorTelefone)
-		abaGerencial.getRange(i, colTelGerencial).setValue(telefoneFormatado);
+		abaAtiva.getRange(i, colTelAtiva).setValue(telefoneFormatado);
 	}
 }
 
 // Função que remove todas linhas vazias no meio da planilha
 function RemoverLinhasVazias() {
-	for (let i = 2; i <= ultimalinhaGerencial; i++) {
-		const emailGerencial = abaGerencial.getRange(i, colEmailGerencial).getValue();
-		if (!emailGerencial) {
-			abaGerencial.deleteRow(i);
+	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
+		const emailAtiva = abaAtiva.getRange(i, colEmailAtiva).getValue();
+		if (!emailAtiva) {
+			abaAtiva.deleteRow(i);
 		}
 	}
+}
+
+// Função para preencher o campo do estado a partir do campo cidade
+function PreencherEstado() {
+	// Atribui os variáveis de acordo com a abaDesejada
+	const { colCidade, colEstado } = objetoMap.get(abaAtiva) || {};
+	Logger.log(colCidade, colEstado);
+	// Loop das linhas
+	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
+		const cidade = abaAtiva.getRange(i, colCidade).getValue();
+
+		abaAtiva.getRange(i, colEstado).setValue(estado);
+	}
+}
+
+function mostrarInterfaceComCheckboxes() {
+	var html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes')
+		.setWidth(400)
+		.setHeight(300);
+	SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
+}
+
+function processarEscolhas(escolhas) {
+	planilhaAtiva.toast('ativo', 'ativo', tempoNotificacao);
+	EsconderLinhas(colTerminouCursoGerencial, "SIM")
+}
+
+function EsconderLinhas(colDesejada, valorAMostrar) {
+
+	const { ultimaLinha } = objetoMap.get(abaAtiva) || {};
+
+	const valColunas = abaAtiva.getRange(2, colDesejada, ultimaLinha, 1).getValues().flat();
+
+
+	for (let i = 0; i < valColunas.length; i++) {
+		if (valColunas[i] != valorAMostrar) {
+			abaAtiva.hideRows(i + 2);
+		}
+	}
+}
+
+function MostrarTodasLinhas() {
+	const { ultimaLinha } = objetoMap.get(abaAtiva) || {};
+
+	abaAtiva.showRows(2, ultimaLinha);
 }

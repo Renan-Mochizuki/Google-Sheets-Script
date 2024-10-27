@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <style>
+        h3 {
+            font-family: Arial, sans-serif;
+        }
+
+        form {
+            font-family: Arial, sans-serif;
+        }
+
+        input[type="button"] {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 24px;
+            cursor: pointer;
+        }
+
+        input[type="button"]:hover {
+            background-color: #45a049;
+        }
+
+        .divBotoesSelecionarTudo {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+
+
+    <script>
+        function enviarEscolhas() {
+            var checkboxes = document.querySelectorAll('input[name="opcoes"]:checked');
+            var escolhas = Array.from(checkboxes).map(cb => cb.value);
+
+            // Enviar escolhas para o código do Google Apps Script
+            google.script.run.withSuccessHandler(response => {
+                // Fechar a interface
+                google.script.host.close();
+            }).withFailureHandler(error => {
+                alert("Erro: Tente abrir a planilha na guia anônima\n" + error.message);
+            }).processarEscolhas(escolhas);
+
+        }
+        function selecionarTudo() {
+            var checkboxes = document.querySelectorAll('input[name="opcoes"]');
+            checkboxes.forEach(cb => cb.checked = true);
+        }
+        function desmarcarTudo() {
+            var checkboxes = document.querySelectorAll('input[name="opcoes"]');
+            checkboxes.forEach(cb => cb.checked = false);
+        }
+    </script>
+</head>
+
+<body>
+    <form id="opcoesForm">
+        <div class="divBotoesSelecionarTudo">
+            <input type="button" value="Selecionar tudo" onclick="selecionarTudo()">
+            <input type="button" value="Desmarcar tudo" onclick="desmarcarTudo()">
+        </div>
+
+
+        <input type="checkbox" id="ocultarLinhas" name="opcoes" value="ocultarLinhas">
+        <label for="ocultarLinhas">Ocultar pessoas que não concluiram o curso</label><br>
+
+        <br>
+        <input type="button" value="Enviar" onclick="enviarEscolhas()">
+    </form>
+
+</body>
+
+</html>
