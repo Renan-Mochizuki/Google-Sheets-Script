@@ -24,9 +24,9 @@ function onOpen(e) {
 
 
 // ORDEM OBRIGATÓRIO DOS CAMPOS
-// Para melhorar a performance, é necessário utilizar evitar ficar chamando a função .getRange(), por isso 
-// foi utilizado intervalos, portanto os campos dessas planilhas devem estar na ordem descrita: 
-// (Caso houver uma mudança na ordem descrita abaixo, mudar nas funções ImportarDadosPLANILHA)
+// Para melhorar a performance, é necessário evitar ficar chamando a função .getRange(), por isso 
+// foi utilizado intervalos, então os campos de certas planilhas devem estar seguir uma regras de ordem descritas:
+// (Caso houver uma mudança na ordem descrita abaixo, mudar nas funções da lógica de importação de cada planilha)
 // Planilha Gerencial:
 // -Nome, Email, Telefone, Cidade, Estado, Whats, RespondeuInteresse, RespondeuMarcoZero, Situacao
 // -LinkMapa, TextoMapa, DataPrazoMapa, ComentarioEnviadoMapa, MensagemVerificacaoMapa
@@ -164,20 +164,20 @@ function ImportarDados(abaDesejada) {
 	// Chamando a função importar anotações apenas quando estivermos no Marco Zero pois os dados da interesse já estarão na gerencial
 	if (abaDesejada == abaMarcoZero) ImportarNotas(abaInteresse);
 
-	// Pegando todos os emails da abaGerencial
+	// Pegando todos os emails da abaGerencial e da abaDesejada
 	const emails = abaGerencial.getRange(2, colEmailGerencial, abaGerencial.getLastRow(), 1).getValues().flat();
 
 	// Loop para percorrer todas linhas da planilha Desejada
 	for (let i = ultimaLinhaAnalisada; i <= ultimaLinha; i++) {
-		let email = abaDesejada.getRange(i, colEmail).getValue();
+		// Pegando os valores da linha e definindo o primeiro item como null para podermos acessar os índices sem precisar subtrair 1
+		const valLinha = [null, ...abaDesejada.getRange(i, 1, 1, ultimaColuna).getValues()[0]];
 
-		// Se não existir email, ou for o "teste" passe para o próximo
+let email = valLinha[colEmail];
+
+// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
 
 		email = email.trim(); // Remove espaços em branco
-
-		// Pegando os valores da linha e definindo o primeiro item como null para podermos acessar os índices sem precisar subtrair 1
-		const valLinha = [null, ...abaDesejada.getRange(i, 1, 1, ultimaColuna).getValues()[0]];
 
 		// Toast da mensagem do progresso de execução da função
 		if (i % 100 === 0) {
