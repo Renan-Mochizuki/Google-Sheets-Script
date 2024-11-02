@@ -154,14 +154,15 @@ function Importar() {
 // Função genérica de importação para todas planilhas
 function ImportarDados(abaDesejada) {
 	// Pegando a próxima linha vazia da planilha gerencial
-	// Obs.: Não se pode usar a variável ultimaLinhaGerencial, pois ela atualiza sozinha
+	// Obs.: Não se pode usar a variável ultimaLinhaGerencial, pois ela não se atualiza sozinha
 	let linhaVazia = abaGerencial.getLastRow() + 1;
 	let linhasAfetadas = 0;
 
 	// Atribui as variáveis de acordo com a abaDesejada
 	const { nome, ultimaLinhaAnalisada, ultimaLinha, ultimaColuna, colEmail, ImportarDadosPlanilha } = objetoMap.get(abaDesejada);
 
-	SpreadsheetApp.flush();
+	// Chamando a função importar anotações apenas quando estivermos no Marco Zero pois os dados da interesse já estarão na gerencial
+	if (abaDesejada == abaMarcoZero) ImportarNotas(abaInteresse);
 
 	// Pegando todos os emails da abaGerencial
 	const emails = abaGerencial.getRange(2, colEmailGerencial, abaGerencial.getLastRow(), 1).getValues().flat();
@@ -291,6 +292,7 @@ function ImportarDadosEnvioMapa(valLinha, linhaAtual, linhaCampoGerencial, linha
 
 	const dataMapa = valLinha[colDataEnvioMapa];
 	const prazoEnvioMapa = valLinha[colPrazoEnvioMapa];
+
 	// Caso ainda não existir prazo, calcular um novo adicionando 7 dias
 	const dataPrazo = (!prazoEnvioMapa && dataMapa) ? new Date(dataMapa.setDate(dataMapa.getDate() + 7)) : prazoEnvioMapa;
 	const comentarioEnviadoMapa = (valLinha[colComentarioEnviadoMapa] || '').toUpperCase()
@@ -532,6 +534,36 @@ function AdicionarAnotacaoGerencial(linhaInserir, anotacaoInserir) {
 			anotacaoInserir = anotacaoGerencial + '; ' + anotacaoInserir;
 		}
 		abaGerencial.getRange(linhaInserir, colAnotacaoGerencial).setValue(anotacaoInserir);
+	}
+}
+
+// Função que importa as anotações
+function ImportarNotas(abaDesejada) {
+	// Atribui as variáveis de acordo com a abaDesejada
+	const { ultimaLinha, colEmail } = objetoMap.get(abaDesejada);
+
+	// Pega todos os valores da coluna desejada
+	const notasColunas = abaDesejada.getRange(2, colEmail, ultimaLinha, 1).getNotes().flat();
+
+	for (let i = 0; i < notasColunas.length; i++) {
+		const anotacao = notasColunas[i];
+
+		if (!anotacao) continue;
+
+		// i + 2, pois a array começa em 0 e a planilha começa em 2 
+		AdicionarAnotacaoGerencial(i + 2, anotacao);
+
+		// Regex para verificar se há um email escrito na anotação
+		const regexEmail = /([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})/;
+		const emailEncontrado = anotacao.match(regexEmail);
+
+		if (emailEncontrado) {
+			// Pegue a nota da abaGerencial, se já existir, adicione um ponto e vírgula e o email, se não, apenas atribua o email encontrado
+			const notaGerencial = abaGerencial.getRange(i + 2, colEmail).getNote();
+			const notaInserir = notaGerencial ? notaGerencial + '; ' + emailEncontrado[0] : emailEncontrado[0];
+
+			abaGerencial.getRange(i + 2, colEmail).setNote(notaInserir);
+		}
 	}
 }
 
