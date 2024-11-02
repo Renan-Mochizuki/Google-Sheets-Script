@@ -49,6 +49,9 @@ function FormatarTelefone(textoTelefone) {
 		// Se o código de país for diferente de 55 (Brasil), retorna o texto original
 		if (resultado[1] !== '55') return textoTelefone;
 		telefoneNumeros = resultado[2];
+	} else if (telefoneNumeros.startsWith("55") && telefoneNumeros.length == 13) {
+		// Para caso for digitado o código do Brasil sem o +
+		telefoneNumeros = telefoneNumeros.substring(2); // Remove os dois primeiros caracteres
 	}
 
 	switch (telefoneNumeros.length) {
@@ -67,23 +70,50 @@ function FormatarTelefone(textoTelefone) {
 }
 
 // Função que usa a função FormatarTelefone para formatar todos os campos da planilha ativa
-function FormatarLinhasTelefone() {
-	// Loop das linhas
-	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
-		const valorTelefone = abaAtiva.getRange(i, colTelAtiva).getValue();
+function FormatarLinhasTelefoneAba(abaDesejada) {
+	// Atribui as variáveis de acordo com a abaDesejada
+	const { colTel, ultimaLinha } = objetoMap.get(abaDesejada);
+
+	// Pega todos os valores da coluna desejada
+	const telefones = abaDesejada.getRange(2, colTel, ultimaLinha, 1).getValues();
+
+	// Percorre toda a matriz
+	for (let i = 0; i < telefones.length; i++) {
+		const tel = telefones[i][0];
 
 		// Se o campo estiver vazio, passe para o próximo
-		if (!valorTelefone) continue;
+		if (!tel) continue;
 
-		const telefoneFormatado = FormatarTelefone(valorTelefone)
-		abaAtiva.getRange(i, colTelAtiva).setValue(telefoneFormatado);
+		// Formata os telefones
+		telefones[i][0] = FormatarTelefone(tel)
 	}
+
+	abaDesejada.getRange(2, colTel, ultimaLinha, 1).setValues(telefones);
+}
+
+// Função que usa a função FormatarTelefone para formatar todos os campos da planilha ativa
+function FormatarLinhasTelefone() {
+	FormatarLinhasTelefoneAba(abaAtiva);
+}
+
+// Função que usa a função FormatarTelefone para formatar todas planilhas
+function FormatarLinhasTelefoneTodasAbas() {
+	Promise.all([
+		FormatarLinhasTelefoneAba(abaInteresse),
+		FormatarLinhasTelefoneAba(abaMarcoZero),
+		FormatarLinhasTelefoneAba(abaEnvioMapa),
+		FormatarLinhasTelefoneAba(abaMarcoFinal),
+		FormatarLinhasTelefoneAba(abaCertificado)
+	]);
 }
 
 // Função que remove todas linhas vazias no meio da planilha
 function RemoverLinhasVazias() {
-	for (let i = 2; i <= ultimaLinhaAtiva; i++) {
-		const emailAtiva = abaAtiva.getRange(i, colEmailAtiva).getValue();
+	// Pega todos os valores da coluna desejada
+	const valColunas = abaAtiva.getRange(2, colEmailAtiva, ultimaLinhaAtiva, 1).getValues().flat();
+
+	// Loop que percorre todos valores da coluna
+	for (let i = 0; i < valColunas.length; i++) {
 		if (!emailAtiva) {
 			abaAtiva.deleteRow(i);
 		}
@@ -116,11 +146,8 @@ function ProcessarEscolhasEsconderLinhas(escolhas) {
 
 // Função que esconde todas as linhas que possuem um certo valor em uma coluna
 function EsconderLinhas(colDesejada, valorAMostrar) {
-	// Atribui os variáveis de acordo com a abaAtiva
-	const { ultimaLinha } = objetoMap.get(abaAtiva);
-
 	// Pega todos os valores da coluna desejada
-	const valColunas = abaAtiva.getRange(2, colDesejada, ultimaLinha, 1).getValues().flat();
+	const valColunas = abaAtiva.getRange(2, colDesejada, ultimaLinhaAtiva, 1).getValues().flat();
 
 	// Loop que percorre todos valores da coluna
 	for (let i = 0; i < valColunas.length; i++) {
@@ -133,7 +160,5 @@ function EsconderLinhas(colDesejada, valorAMostrar) {
 
 // Função que revela todas as linhas escondidas
 function MostrarTodasLinhas() {
-	// Atribui as variáveis de acordo com a abaAtiva
-	const { ultimaLinha } = objetoMap.get(abaAtiva);
-	abaAtiva.showRows(2, ultimaLinha);
+	abaAtiva.showRows(2, ultimaLinhaAtiva);
 }

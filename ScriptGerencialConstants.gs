@@ -22,6 +22,7 @@ const colEstadoInteresse = Coluna('I');
 const colWhatsInteresse = Coluna('M');
 const colRespondeuMarcoZeroInteresse = Coluna('N');
 const colSituacaoInteresse = Coluna('O');
+const colAnotacaoInteresse = Coluna('P');
 
 // Colunas planilha Marco Zero
 const colNomeMarcoZero = colNomeGeral;
@@ -67,7 +68,7 @@ const colNomeGerencial = colNomeGeral;
 const colEmailGerencial = colEmailGeral;
 const colTelGerencial = colTelGeral;
 
-const colEmailsTelefonesAlternativosGerencial = Coluna('A');
+const colAnotacaoGerencial = Coluna('A');
 const colTerminouCursoGerencial = Coluna('B');
 const colCidadeGerencial = Coluna('F');
 const colEstadoGerencial = Coluna('G');
@@ -96,6 +97,7 @@ const colRedirectCertificadoGerencial = Coluna('AC');
 
 // Outras variáveis
 const tempoNotificacao = 30;
+const corCampoSemDados = '#ababab';
 
 // Variáveis de otimização (Possível futura implementação)
 // Ideia: Armazenar a ultima linha analisada para reduzir o tamanho do loop, assim evitando analisar toda vez campos já analisados
@@ -216,7 +218,7 @@ const objetoMap = new Map([
         colCidade: colCidadeGerencial,
         colEstado: colEstadoGerencial
     }],
-    [abaAtiva,{
+    [abaAtiva, {
         nome: 'Ativa',
         ultimaLinha: ultimaLinhaAtiva,
         ultimaColuna: ultimaColunaAtiva,
