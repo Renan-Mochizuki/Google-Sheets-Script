@@ -131,20 +131,20 @@ function Importar() {
 	// planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
 	// VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
-	totalLinhasAfetadas += ImportarDados(abaInteresse);
+	// planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
+	// totalLinhasAfetadas += ImportarDados(abaInteresse);
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
-	totalLinhasAfetadas += ImportarDados(abaMarcoZero);
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
+	// totalLinhasAfetadas += ImportarDados(abaMarcoZero);
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
-	totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
+	// totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
 
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaMarcoFinal);
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
-	totalLinhasAfetadas += ImportarDados(abaCertificado);
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
+	// totalLinhasAfetadas += ImportarDados(abaCertificado);
 
 	const quantidadeLinhasCriadas = abaGerencial.getLastRow() + 1 - ultimaLinhaGerencial;
 	const mensagem = 'Fim da execução.\n' + quantidadeLinhasCriadas + ' linhas criadas\n' + totalLinhasAfetadas + ' linhas afetadas';
@@ -165,7 +165,7 @@ function ImportarDados(abaDesejada) {
 	if (abaDesejada == abaMarcoZero) ImportarNotas(abaInteresse);
 
 	// Pegando todos os emails da abaGerencial e da abaDesejada
-// Utilizando flat() pois o getValues() de um intervalo retorna uma matriz e flat() a transforma em uma array
+	// Utilizando flat() pois o getValues() de um intervalo retorna uma matriz e flat() a transforma em uma array
 	const emails = abaGerencial.getRange(2, colEmailGerencial, abaGerencial.getLastRow(), 1).getValues().flat();
 
 	// Loop para percorrer todas linhas da planilha Desejada
@@ -173,9 +173,9 @@ function ImportarDados(abaDesejada) {
 		// Pegando os valores da linha e definindo o primeiro item como null para podermos acessar os índices sem precisar subtrair 1
 		const valLinha = [null, ...abaDesejada.getRange(i, 1, 1, ultimaColuna).getValues()[0]];
 
-let email = valLinha[colEmail];
+		let email = valLinha[colEmail];
 
-// Se não existir email, ou for o "teste" passe para o próximo
+		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
 
 		email = email.trim(); // Remove espaços em branco
@@ -393,7 +393,7 @@ function LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaDeseja
 	abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 3).setValues([intervaloInserir]);
 
 	// Preencher os outros dados da planilha
-	ImportarDadosPlanilha(linhaAtual, linhaVazia, linhaVazia + 1);
+	ImportarDadosPlanilha(valLinha, linhaAtual, linhaVazia, linhaVazia + 1);
 }
 
 // Função que adiciona um link para redirecionamento na planilha gerencial
