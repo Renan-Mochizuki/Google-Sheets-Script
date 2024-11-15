@@ -14,7 +14,7 @@ function LimparPlanilha() {
 	// Limpa o conteúdo do intervalo selecionado
 	planilha.clearContent();
 	planilha.setBackground('#ffffff');
-  planilha.clearNote();
+	planilha.clearNote();
 	// }
 	// }
 }

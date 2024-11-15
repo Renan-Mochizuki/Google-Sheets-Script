@@ -12,91 +12,13 @@ function onOpen(e) {
 			.addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
 			.addItem('Remover linhas vazias', 'RemoverLinhasVazias')
 			.addItem('Mostrar todas linhas', 'MostrarTodasLinhas')
-			.addItem('Esconder linhas', 'mostrarInterfaceComCheckboxes'))
+			.addItem('Esconder linhas', 'MostrarInterfaceEsconderLinhas'))
 		.addToUi();
 }
 
-// AVISOS
-// O código de escopo global (que não está dentro de uma função) é executado toda vez que um script inicia
-// Por isso, é preciso tomar cuidado ao utilizar variáveis como ultimaLinha, pois ela não é atualizada durante
-// a execução do script
-// Nesse caso é necessário fazer aba.getLastRow() novamente na função
 
-
-// ORDEM OBRIGATÓRIO DOS CAMPOS
-// Para melhorar a performance, é necessário evitar ficar chamando a função .getRange(), por isso 
-// foi utilizado intervalos, então os campos de certas planilhas devem seguir algumas regras de ordem descritas:
-// (Caso houver uma mudança na ordem descrita abaixo, mudar nas funções da lógica de importação de cada planilha)
-// Planilha Gerencial:
-// -Nome, Email, Telefone, Cidade, Estado, Whats, RespondeuInteresse, RespondeuMarcoZero, Situacao
-// -LinkMapa, TextoMapa, DataPrazoMapa, ComentarioEnviadoMapa, MensagemVerificacaoMapa
-// -RespondeuMarcoFinal, EnviouReflexaoMarcoFinal, PrazoEnvioMarcoFinal,ComentarioEnviadoMarcoFinal
-// -DataCertificado, LinkCertificado, LinkTestadoCertificado, EntrouGrupoCertificado
-
-
-// SOBRE VARIÁVEIS E FUNÇÕES
-// -- Variáveis de Colunas das planilhas: --
-// 	  Ver arquivo Constants
-//
-// -- Funções da Gerencial: --
-//    RetornarLinhaEmailDados(emailProcurado: string, dados: string[]):
-//    - retorna a linha daquele email na planilha desejada, passando uma array dados, se não existir, retorna false
-//    Importar():
-//    - chama outras funções para sincronizar as planilhas e chama as funções de importação de todos dados
-//    ImportarDados(abaDesejada: sheet):
-//    - função genérica para chamar a função de importação de dados de cada planilha
-//    ImportarDadosInteresse(valLinha: string[], linhaAtual: int, linhaCampoGerencial: int || false, linhaVazia: int):
-//    - pega todos os dados da Interesse e move na Gerencial ou apenas atualiza os campos adicionais
-//    ImportarDadosMarcoZero(valLinha: string[], linhaAtual: int, linhaCampoGerencial: int || false, linhaVazia: int):
-//    - pega todos os dados do Marco Zero e move na Gerencial ou apenas o campo respondeu interesse
-//    ImportarDadosEnvioMapa(valLinha: string[], linhaAtual: int, linhaCampoGerencial: int || false, linhaVazia: int):
-//    - pega todos os dados do Envio do Mapa e move na Gerencial ou apenas atualiza os campos adicionais
-//    ImportarDadosMarcoFinal(valLinha: string[], linhaAtual: int, linhaCampoGerencial: int || false, linhaVazia: int):
-//    - pega todos os dados do Marco Final e move na Gerencial ou apenas atualiza os campos adicionais
-//    ImportarDadosCertificado(valLinha: string[], linhaAtual: int, linhaCampoGerencial: int || false, linhaVazia: int):
-//    - pega todos os dados do Certificado e move na Gerencial ou apenas atualiza os campos adicionais
-//    LidarComPessoaNaoCadastrada(valLinha: string[], linhaAtual: int, linhaVazia: int, abaDesejada: sheet):
-//    - função genérica para lidar com pessoas que estão em formulários posteriores sem estar na de interesse ou marco zero   
-//    InserirRedirecionamentoPlanilha(linhaAtual: int, colInserir: int, urlInteresse: string, linhaDestino: int):
-//    - insere um link em um campo para um campo específico em outra planilha
-//    SincronizarWhatsGerencial():
-//    - sincroniza o campo do whatsapp entre todas as planilhas
-//    SincronizarCampoPlanilhas(abaDesejada1: sheet, colDesejada1: int, abaDesejada2: sheet, colDesejada2: int):
-//    - sincroniza um campo escolhido entre duas planilhas desejadas
-//    CompararValoresEMarcar(celDesejada1: cell, celDesejada2: cell):
-//    - função genérica usada pela função SincronizarCampoPlanilhas para sincronizar dois campos de "SIM" ou "NÃO"
-//    VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro: sheet, colParaRegistro: int, abaParaVerificar: sheet, valCustomizadoSim: string || undefined, valCustomizadoNao: string || undefined):
-//    - verifica se a pessoa está cadastrada em uma planilha e marca em outra
-//    AdicionarAnotacaoGerencial(linhaVazia: int, anotacaoInserir: string || null):
-//    - adiciona uma anotacao de uma planilha para a gerencial
-//    VerificarRepeticoes(abaDesejada: sheet):
-//    - função que verifica se tem um email repetido numa planilha
-//    VerificarRepeticoesGerencial():
-//    - função que chama a função VerificarRepeticoes passando a abaGerencial
-//    CriaContatos(): (Função não finalizada)
-//    - cria contatos no Google People a partir dos dados da planilha Gerencial
-//
-// -- Funções de formatação: --
-//    LimparPlanilha():
-//    - limpa toda a planilha
-//    CompletarVaziosComNao():
-//    - preenche todos os campos adicionais vazios da planilha gerencial com o texto "NÃO"
-//    FormatarTelefone(textoTelefone: string):
-//    - recebe um telefone em formato de texto e o retorna formatado e padronizado
-//    FormatarLinhasTelefone():
-//    - faz uso da função FormatarTelefone para formatar todos telefones da planilha
-//    RemoverLinhasVazias():
-//    - remove linhas que estiverem sem email
-//    PreencherEstado():
-//    - preenche o campo estado de acordo com o que foi digitado no campo cidade
-//    MostrarInterfaceEsconderLinhas():
-//    - função que exibe o HTML da interface com checkboxes para escolher quem quer esconder
-//    ProcessarEscolhasEsconderLinhas(escolhas: int[]):
-//    - função que recebe as escolhas feitas na interface e chama a função EsconderLinhas como necessário
-//    EsconderLinhas(colDesejada: int, valorAMostrar: string):
-//    - função que esconde todas as linhas que possuem um certo valor em uma coluna
-//    MostrarTodasLinhas():
-//    - função que revela todas as linhas escondidas
+// -- IMPORTANTE --
+// VEJA OS COMENTÁRIOS DO ARQUIVO CONSTANTS
 
 
 // Função que verificará se o email existe na planilha desejada e retornará a linha
@@ -187,7 +109,6 @@ function ImportarDados(abaDesejada) {
 		}
 
 		const linhaCampoGerencial = RetornarLinhaEmailDados(email, emails);
-
 		const foiCastradoNovoEmail = ImportarDadosPlanilha(valLinha, i, linhaCampoGerencial, linhaVazia);
 
 		if (foiCastradoNovoEmail) {
@@ -576,7 +497,7 @@ function VerificarRepeticoesGerencial() {
 // Função que verifica se existe um email repetido
 function VerificarRepeticoes(abaDesejada) {
 	const { ultimaLinha, colEmail } = objetoMap.get(abaDesejada);
-	const emails = abaDesejada.getRange(2, colEmail, ultimaLinha, 1).getValues().flat();
+	const emailsTelefones = abaDesejada.getRange(2, colEmail, ultimaLinha, 2).getValues();
 
 	for (let i = 0; i < emails.length; i++) {
 		const email = emails[i];
