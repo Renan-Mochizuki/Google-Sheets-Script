@@ -99,13 +99,11 @@ function FormatarLinhasTelefone() {
 
 // Função que usa a função FormatarTelefone para formatar todas planilhas
 function FormatarLinhasTelefoneTodasAbas() {
-	Promise.all([
-		FormatarLinhasTelefoneAba(abaInteresse),
-		FormatarLinhasTelefoneAba(abaMarcoZero),
-		FormatarLinhasTelefoneAba(abaEnvioMapa),
-		FormatarLinhasTelefoneAba(abaMarcoFinal),
-		FormatarLinhasTelefoneAba(abaCertificado)
-	]);
+		FormatarLinhasTelefoneAba(abaInteresse);
+		FormatarLinhasTelefoneAba(abaMarcoZero);
+		FormatarLinhasTelefoneAba(abaEnvioMapa);
+		FormatarLinhasTelefoneAba(abaMarcoFinal);
+		FormatarLinhasTelefoneAba(abaCertificado);
 }
 
 // Função que remove todas linhas vazias no meio da planilha

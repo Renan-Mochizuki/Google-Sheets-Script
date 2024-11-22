@@ -42,31 +42,29 @@ function Importar() {
 	// Formatando os telefones de todas as planilhas
 	planilhaAtiva.toast('Formatando telefones de todas planilhas', tituloToast, tempoNotificacao);
 	FormatarLinhasTelefoneTodasAbas();
-
 	// Chamando funções das planilhas para atualizar seus campos
-	// planilhaAtiva.toast('Sincronizando campos Whats', tituloToast, tempoNotificacao);
-	// SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
-
+	planilhaAtiva.toast('Sincronizando campos Whats', tituloToast, tempoNotificacao);
+	SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
 	// Verifica na planilha Interesse, quem respondeu o Marco Zero, e verifica na planilha Marco Zero, quem respondeu o Interesse
-	// planilhaAtiva.toast('Verificando respostas Marco Zero', tituloToast, tempoNotificacao);
-	// VerificarEMarcarCadastroOutraPlanilha(abaInteresse, colRespondeuMarcoZeroInteresse, abaMarcoZero);
-	// planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
-	// VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
+	planilhaAtiva.toast('Verificando respostas Marco Zero', tituloToast, tempoNotificacao);
+	VerificarEMarcarCadastroOutraPlanilha(abaInteresse, colRespondeuMarcoZeroInteresse, abaMarcoZero);
+	planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
+	VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
 
-	// planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
-	// totalLinhasAfetadas += ImportarDados(abaInteresse);
+	planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
+	totalLinhasAfetadas += ImportarDados(abaInteresse);
 
-	// planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
-	// totalLinhasAfetadas += ImportarDados(abaMarcoZero);
+	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
+	totalLinhasAfetadas += ImportarDados(abaMarcoZero);
 
-	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
-	// totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
+	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
+	totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
 
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaMarcoFinal);
 
-	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
-	// totalLinhasAfetadas += ImportarDados(abaCertificado);
+	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
+	totalLinhasAfetadas += ImportarDados(abaCertificado);
 
 	const quantidadeLinhasCriadas = abaGerencial.getLastRow() + 1 - ultimaLinhaGerencial;
 	const mensagem = 'Fim da execução.\n' + quantidadeLinhasCriadas + ' linhas criadas\n' + totalLinhasAfetadas + ' linhas afetadas';
@@ -354,11 +352,12 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 	const { ultimaLinha: ultimaLinha2, colEmail: colEmail2 } = objetoMap.get(abaDesejada2);
 
 	// Pegando todos os emails da abaDesejada2
-	const emails = abaDesejada2.getRange(2, colEmail2, ultimaLinha2, 1).getValues().flat();
+	const emails1 = abaDesejada1.getRange(2, colEmail1, ultimaLinha1, 1).getValues().flat();
+	const emails2 = abaDesejada2.getRange(2, colEmail2, ultimaLinha2, 1).getValues().flat();
 
 	// Loop para percorrer as linhas da abaDesejada1
-	for (let i = 2; i <= ultimaLinha1; i++) {
-		const email = abaDesejada1.getRange(i, colEmail1).getValue();
+	for (let i = 0; i < emails1.length; i++) {
+		let email = emails1[0];
 
 		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
@@ -366,11 +365,12 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 		email = email.trim(); // Remove espaços em branco
 
 		// Pegue a linha do campo na planilha desejada 2
-		const linhaCampoDesejada2 = RetornarLinhaEmailDados(email, emails);
+		const linhaCampoDesejada2 = RetornarLinhaEmailDados(email, emails2);
 
 		// Se o email for encontrado na outra planilha
 		if (linhaCampoDesejada2) {
-			const celDesejada1 = abaDesejada1.getRange(i, colDesejada1);
+			// i + 2, pois a array começa em 0 e a planilha começa em 2 
+			const celDesejada1 = abaDesejada1.getRange(i + 2, colDesejada1);
 			const celDesejada2 = abaDesejada2.getRange(linhaCampoDesejada2, colDesejada2);
 
 			CompararValoresEMarcar(celDesejada1, celDesejada2);
@@ -414,7 +414,8 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
 	const { ultimaLinha: ultimaLinhaRegistro, colEmail: colEmailRegistro, nome: nomeRegistro } = objetoMap.get(abaParaRegistro);
 	const { ultimaLinha: ultimaLinhaVerificar, colEmail: colEmailVerificar, nome: nomeDestino } = objetoMap.get(abaParaVerificar);
 
-	const emailsAbaParaVerificar = abaParaVerificar.getRange(2, colEmailVerificar, ultimaLinhaVerificar, 1).getValues().flat();
+	const emailsAbaRegistro = abaParaRegistro.getRange(2, colEmailRegistro, ultimaLinhaRegistro, 1).getValues().flat();
+	const emailsAbaVerificar = abaParaVerificar.getRange(2, colEmailVerificar, ultimaLinhaVerificar, 1).getValues().flat();
 
 	//Pegar o email na planilha Desejada
 	for (let i = 2; i <= ultimaLinhaRegistro; i++) {
@@ -424,7 +425,7 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
 		// Se o campo já estiver marcado com sim, passe para o próximo
 		if (valParaRegistro == "SIM") continue;
 
-		const email = abaParaRegistro.getRange(i, colEmailRegistro).getValue();
+		let email = abaParaRegistro.getRange(i, colEmailRegistro).getValue();
 
 		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
@@ -438,7 +439,7 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
 			planilhaAtiva.toast(textoToast, tituloToast, tempoNotificacao);
 		}
 
-		if (RetornarLinhaEmailDados(email, emailsAbaParaVerificar)) {
+		if (RetornarLinhaEmailDados(email, emailsAbaVerificar)) {
 			celParaRegistro.setValue(valCustomizadoSim ?? "SIM");
 		} else {
 			celParaRegistro.setValue(valCustomizadoNao ?? "NÃO");
@@ -457,6 +458,10 @@ function AdicionarAnotacaoGerencial(linhaInserir, anotacaoInserir) {
 		}
 		abaGerencial.getRange(linhaInserir, colAnotacaoGerencial).setValue(anotacaoInserir);
 	}
+}
+
+function SepararEmails(texto) {
+
 }
 
 // Função que importa as anotações
