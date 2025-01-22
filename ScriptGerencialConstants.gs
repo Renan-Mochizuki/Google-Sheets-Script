@@ -1,3 +1,118 @@
+// AVISOS
+// O código de escopo global (que não está dentro de uma função) é executado toda vez que um script inicia
+// Por isso, é preciso tomar cuidado ao utilizar variáveis como ultimaLinha, pois ela não é atualizada durante
+// a execução do script
+// Nesse caso é necessário fazer aba.getLastRow() novamente na função
+
+
+// ORDEM OBRIGATÓRIO DOS CAMPOS
+// Para melhorar a performance, é necessário evitar ficar chamando a função .getRange(), por isso 
+// foi utilizado intervalos, então os campos de certas planilhas devem seguir algumas regras de ordem descritas:
+// (Caso houver uma mudança na ordem descrita abaixo, mudar nas funções da lógica de importação de cada planilha)
+// Planilha Gerencial:
+// -Nome, Email, Telefone, Cidade, Estado, Whats, RespondeuInteresse, RespondeuMarcoZero, Situacao
+// -LinkMapa, TextoMapa, DataPrazoMapa, ComentarioEnviadoMapa, MensagemVerificacaoMapa
+// -RespondeuMarcoFinal, EnviouReflexaoMarcoFinal, PrazoEnvioMarcoFinal,ComentarioEnviadoMarcoFinal
+// -DataCertificado, LinkCertificado, LinkTestadoCertificado, EntrouGrupoCertificado
+// Todas Planilhas: (Caso alguma planilha não seguir mais essa ordem, alterar VerificarRepetições)
+// -Email, Telefone
+
+
+// SOBRE VARIÁVEIS E FUNÇÕES
+// -- Variáveis do Constants --
+// 	  Colunas, planilhas, abas, links, 
+//    estados, tempoNotificacao, corCampoSemDados 
+//    e objetoMap (utilizado para generalizar o código)
+//
+// -- Funções da Gerencial: --
+//    
+//    RetornarLinhaEmailDados(emailProcurado, dados): string, string[] => int || false
+//    - retorna a linha daquele email na planilha desejada, passando uma array dados, se não existir, retorna false
+//    
+//    Importar(): 
+//    - chama outras funções para sincronizar as planilhas e chama as funções de importação de todos dados
+//    
+//    ImportarDados(abaDesejada): sheet => int
+//    - função genérica para chamar a função de importação de dados de cada planilha
+//    
+//    ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
+//    - pega todos os dados da Interesse e move na Gerencial ou apenas atualiza os campos adicionais
+//    
+//    ImportarDadosMarcoZero(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
+//    - pega todos os dados do Marco Zero e move na Gerencial ou apenas o campo respondeu interesse
+//    
+//    ImportarDadosEnvioMapa(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
+//    - pega todos os dados do Envio do Mapa e move na Gerencial ou apenas atualiza os campos adicionais
+//    
+//    ImportarDadosMarcoFinal(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
+//    - pega todos os dados do Marco Final e move na Gerencial ou apenas atualiza os campos adicionais
+//    
+//    ImportarDadosCertificado(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
+//    - pega todos os dados do Certificado e move na Gerencial ou apenas atualiza os campos adicionais
+//    
+//    LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaDesejada): string[], int, int, sheet
+//    - função genérica para lidar com pessoas que estão em formulários posteriores sem estar na de interesse ou marco zero
+//    
+//    InserirRedirecionamentoPlanilha(linhaAtual, colInserir, urlInteresse, linhaDestino): int, int, string, int
+//    - insere um link em um campo para um campo específico em outra planilha
+//    
+//    SincronizarWhatsGerencial(): 
+//    - sincroniza o campo do whatsapp entre todas as planilhas
+//    
+//    SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, colDesejada2): sheet, int, sheet, int
+//    - sincroniza um campo escolhido entre duas planilhas desejadas
+//    
+//    CompararValoresEMarcar(celDesejada1, celDesejada2): cell, cell
+//    - função genérica usada pela função SincronizarCampoPlanilhas para sincronizar dois campos de "SIM" ou "NÃO"
+//    
+//    VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro, abaParaVerificar, valCustomizadoSim, valCustomizadoNao): sheet, int, sheet, string/undefined, string/undefined
+//    - verifica se a pessoa está cadastrada em uma planilha e marca em outra
+//    
+//    AdicionarAnotacaoGerencial(linhaVazia, anotacaoInserir): int, string/null
+//    - adiciona uma anotacao de uma planilha para a gerencial
+//    
+//    VerificarRepeticoes(abaDesejada): sheet
+//    - função que verifica se tem um email repetido numa planilha
+//    
+//    VerificarRepeticoesGerencial(): 
+//    - função que chama a função VerificarRepeticoes passando a abaGerencial
+//    
+//    CriaContatos(): 
+//    - cria contatos no Google People a partir dos dados da planilha Gerencial (Função não finalizada)
+//    
+// -- Funções de formatação: --
+//    
+//    LimparPlanilha(): 
+//    - limpa toda a planilha
+//    
+//    CompletarVaziosComNao(): 
+//    - preenche todos os campos adicionais vazios da planilha gerencial com o texto "NÃO"
+//    
+//    FormatarTelefone(textoTelefone): string
+//    - recebe um telefone em formato de texto e o retorna formatado e padronizado
+//    
+//    FormatarLinhasTelefone(): 
+//    - faz uso da função FormatarTelefone para formatar todos telefones da planilha
+//    
+//    RemoverLinhasVazias(): 
+//    - remove linhas que estiverem sem email
+//    
+//    PreencherEstado(): 
+//    - preenche o campo estado de acordo com o que foi digitado no campo cidade
+//    
+//    MostrarInterfaceEsconderLinhas(): 
+//    - função que exibe o HTML da interface com checkboxes para escolher quem quer esconder
+//    
+//    ProcessarEscolhasEsconderLinhas(escolhas): int[]
+//    - função que recebe as escolhas feitas na interface e chama a função EsconderLinhas como necessário
+//    
+//    EsconderLinhas(colDesejada, valorAMostrar): int, string
+//    - função que esconde todas as linhas que possuem um certo valor em uma coluna
+//    
+//    MostrarTodasLinhas(): 
+//    - função que revela todas as linhas escondidas
+
+
 // Função que recebe o nome da coluna e transforma em número (Ex.: A = 1; Z = 26; AA = 27; AB = 28)
 function Coluna(letras) {
     let numero = 0;
@@ -22,6 +137,7 @@ const colEstadoInteresse = Coluna('I');
 const colWhatsInteresse = Coluna('M');
 const colRespondeuMarcoZeroInteresse = Coluna('N');
 const colSituacaoInteresse = Coluna('O');
+const colAnotacaoInteresse = Coluna('P');
 
 // Colunas planilha Marco Zero
 const colNomeMarcoZero = colNomeGeral;
@@ -67,7 +183,7 @@ const colNomeGerencial = colNomeGeral;
 const colEmailGerencial = colEmailGeral;
 const colTelGerencial = colTelGeral;
 
-const colEmailsTelefonesAlternativosGerencial = Coluna('A');
+const colAnotacaoGerencial = Coluna('A');
 const colTerminouCursoGerencial = Coluna('B');
 const colCidadeGerencial = Coluna('F');
 const colEstadoGerencial = Coluna('G');
@@ -96,6 +212,7 @@ const colRedirectCertificadoGerencial = Coluna('AC');
 
 // Outras variáveis
 const tempoNotificacao = 30;
+const corCampoSemDados = '#ababab';
 
 // Variáveis de otimização (Possível futura implementação)
 // Ideia: Armazenar a ultima linha analisada para reduzir o tamanho do loop, assim evitando analisar toda vez campos já analisados
@@ -216,7 +333,7 @@ const objetoMap = new Map([
         colCidade: colCidadeGerencial,
         colEstado: colEstadoGerencial
     }],
-    [abaAtiva,{
+    [abaAtiva, {
         nome: 'Ativa',
         ultimaLinha: ultimaLinhaAtiva,
         ultimaColuna: ultimaColunaAtiva,
@@ -226,7 +343,60 @@ const objetoMap = new Map([
     }]
 ]);
 
+// Função que remove acentos e normaliza uma string
+function NormalizarString(str) {
+    if(typeof str !== 'string') return str;
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+// Função que calcula a distância de Levenshtein entre duas strings
+function CalcularLevenshtein(str1, str2) {
+    str1 = str1.toLowerCase();
+    str2 = str2.toLowerCase();
+
+    let costs = new Array();
+    for (let i = 0; i <= str1.length; i++) {
+        let lastValue = i;
+        for (let j = 0; j <= str2.length; j++) {
+        if (i == 0) costs[j] = j;
+        else {
+            if (j > 0) {
+            let newValue = costs[j - 1];
+            if (str1.charAt(i - 1) != str2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+            }
+        }
+        }
+        if (i > 0) costs[str2.length] = lastValue;
+    }
+    return costs[str2.length];
+    }
+
+function CompararSimilaridade(str1, str2, argTolerance) {
+    str1 = String(str1);
+    str2 = String(str2);
+    
+    let longer = str1;
+    let shorter = str2;
+    if (str1.length < str2.length) {
+        longer = str2;
+        shorter = str1;
+    }
+    let longerLength = longer.length;
+
+    if (longerLength == 0) return 1.0;
+
+    const similarity = (longerLength - CalcularLevenshtein(longer, shorter)) / parseFloat(longerLength);
+    const tolerance = argTolerance || 0.75;
+
+    if (similarity >= tolerance) return true;
+    else return false;
+}
+
 const estados = [
+    "Acre - AC",
+    "Alagoas - AL",
     "Amapá - AP",
     "Amazonas - AM",
     "Bahia - BA",
