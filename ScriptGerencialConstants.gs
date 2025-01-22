@@ -35,19 +35,19 @@
 //    ImportarDados(abaDesejada): sheet => int
 //    - função genérica para chamar a função de importação de dados de cada planilha
 //    
-//    ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int || false, int => string || false
+//    ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
 //    - pega todos os dados da Interesse e move na Gerencial ou apenas atualiza os campos adicionais
 //    
-//    ImportarDadosMarcoZero(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int || false, int => string || false
+//    ImportarDadosMarcoZero(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
 //    - pega todos os dados do Marco Zero e move na Gerencial ou apenas o campo respondeu interesse
 //    
-//    ImportarDadosEnvioMapa(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int || false, int => string || false
+//    ImportarDadosEnvioMapa(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
 //    - pega todos os dados do Envio do Mapa e move na Gerencial ou apenas atualiza os campos adicionais
 //    
-//    ImportarDadosMarcoFinal(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int || false, int => string || false
+//    ImportarDadosMarcoFinal(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
 //    - pega todos os dados do Marco Final e move na Gerencial ou apenas atualiza os campos adicionais
 //    
-//    ImportarDadosCertificado(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int || false, int => string || false
+//    ImportarDadosCertificado(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia): string[], int, int/false, int => string/false
 //    - pega todos os dados do Certificado e move na Gerencial ou apenas atualiza os campos adicionais
 //    
 //    LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaDesejada): string[], int, int, sheet
@@ -65,10 +65,10 @@
 //    CompararValoresEMarcar(celDesejada1, celDesejada2): cell, cell
 //    - função genérica usada pela função SincronizarCampoPlanilhas para sincronizar dois campos de "SIM" ou "NÃO"
 //    
-//    VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro, abaParaVerificar, valCustomizadoSim, valCustomizadoNao): sheet, int, sheet, string || undefined, string || undefined
+//    VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro, abaParaVerificar, valCustomizadoSim, valCustomizadoNao): sheet, int, sheet, string/undefined, string/undefined
 //    - verifica se a pessoa está cadastrada em uma planilha e marca em outra
 //    
-//    AdicionarAnotacaoGerencial(linhaVazia, anotacaoInserir): int, string || null
+//    AdicionarAnotacaoGerencial(linhaVazia, anotacaoInserir): int, string/null
 //    - adiciona uma anotacao de uma planilha para a gerencial
 //    
 //    VerificarRepeticoes(abaDesejada): sheet
@@ -342,6 +342,57 @@ const objetoMap = new Map([
         colTel: colTelAtiva
     }]
 ]);
+
+// Função que remove acentos e normaliza uma string
+function NormalizarString(str) {
+    if(typeof str !== 'string') return str;
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+// Função que calcula a distância de Levenshtein entre duas strings
+function CalcularLevenshtein(str1, str2) {
+    str1 = str1.toLowerCase();
+    str2 = str2.toLowerCase();
+
+    let costs = new Array();
+    for (let i = 0; i <= str1.length; i++) {
+        let lastValue = i;
+        for (let j = 0; j <= str2.length; j++) {
+        if (i == 0) costs[j] = j;
+        else {
+            if (j > 0) {
+            let newValue = costs[j - 1];
+            if (str1.charAt(i - 1) != str2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+            }
+        }
+        }
+        if (i > 0) costs[str2.length] = lastValue;
+    }
+    return costs[str2.length];
+    }
+
+function CompararSimilaridade(str1, str2, argTolerance) {
+    str1 = String(str1);
+    str2 = String(str2);
+    
+    let longer = str1;
+    let shorter = str2;
+    if (str1.length < str2.length) {
+        longer = str2;
+        shorter = str1;
+    }
+    let longerLength = longer.length;
+
+    if (longerLength == 0) return 1.0;
+
+    const similarity = (longerLength - CalcularLevenshtein(longer, shorter)) / parseFloat(longerLength);
+    const tolerance = argTolerance || 0.75;
+
+    if (similarity >= tolerance) return true;
+    else return false;
+}
 
 const estados = [
     "Acre - AC",
