@@ -4,7 +4,7 @@ function onOpen(e) {
 	ui.createMenu('Menu de Funções')
 		.addItem('📂 Importar Dados', 'Importar')
 		.addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
-		.addItem('👤 Criar contatos', 'CriaContatos')
+		// .addItem('👤 Criar contatos', 'CriaContatos')
 		.addItem('🗑️ Excluir todos os campos', 'LimparPlanilha')
 		.addSeparator()
 		.addSubMenu(ui.createMenu('Formatação da planilha')
@@ -68,29 +68,31 @@ function Importar() {
 	// Chamando funções das planilhas para atualizar seus campos
 	planilhaAtiva.toast('Sincronizando campos Whats', tituloToast, tempoNotificacao);
 	SincronizarCampoPlanilhas(abaInteresse, colWhatsInteresse, abaMarcoZero, colWhatsMarcoZero);
-	// // Verifica na planilha Interesse, quem respondeu o Marco Zero, e verifica na planilha Marco Zero, quem respondeu o Interesse
-	// planilhaAtiva.toast('Verificando respostas Marco Zero', tituloToast, tempoNotificacao);
-	// VerificarEMarcarCadastroOutraPlanilha(abaInteresse, colRespondeuMarcoZeroInteresse, abaMarcoZero);
-	// planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
-	// VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
+	// Verifica na planilha Interesse, quem respondeu o Marco Zero, e verifica na planilha Marco Zero, quem respondeu o Interesse
+	planilhaAtiva.toast('Verificando respostas Marco Zero', tituloToast, tempoNotificacao);
+	VerificarEMarcarCadastroOutraPlanilha(abaInteresse, colRespondeuMarcoZeroInteresse, abaMarcoZero);
+	planilhaAtiva.toast('Verificando respostas Interesse', tituloToast, tempoNotificacao);
+	VerificarEMarcarCadastroOutraPlanilha(abaMarcoZero, colRespondeuInteresseMarcoZero, abaInteresse, null, "S. PÚBLICA");
 
 	planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaInteresse);
 
+	ImportarNotas(abaInteresse);
+	
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaMarcoZero);
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
-	totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
+	// totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
-	totalLinhasAfetadas += ImportarDados(abaMarcoFinal);
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
+	// totalLinhasAfetadas += ImportarDados(abaMarcoFinal);
 
-	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
-	totalLinhasAfetadas += ImportarDados(abaCertificado);
+	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
+	// totalLinhasAfetadas += ImportarDados(abaCertificado);
 
-	const quantidadeLinhasCriadas = abaGerencial.getLastRow() + 1 - ultimaLinhaGerencial;
-	const mensagem = 'Fim da execução.\n' + quantidadeLinhasCriadas + ' linhas criadas\n' + totalLinhasAfetadas + ' linhas afetadas';
+	const quantidadeLinhasCriadas = abaGerencial.getLastRow() - ultimaLinhaGerencial;
+	const mensagem = 'Fim da execução.\n' + quantidadeLinhasCriadas + ' linhas criadas e ' + totalLinhasAfetadas + ' linhas já registradas analisadas';
 	planilhaAtiva.toast(mensagem, 'Execução finalizada', tempoNotificacao);
 }
 
@@ -104,9 +106,6 @@ function ImportarDados(abaDesejada) {
 
 	// Atribui as variáveis de acordo com a abaDesejada
 	const { nome, ultimaLinhaAnalisada, ultimaLinha, ultimaColuna, colEmail, colTel, ImportarDadosPlanilha } = objetoMap.get(abaDesejada);
-
-	// Chamando a função importar anotações apenas quando estivermos no Marco Zero pois os dados da interesse já estarão na gerencial
-	if (abaDesejada == abaMarcoZero) ImportarNotas(abaInteresse);
 
 	// Pegando todos os emails e telefones da abaGerencial
 	const emailsTelefones = abaGerencial.getRange(2, colEmailGerencial, ultimaLinhaGerencial, 2).getValues();
@@ -172,8 +171,7 @@ function ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linha
 		AdicionarAnotacaoGerencial(linhaVazia, valLinha[colAnotacaoInteresse]);
 
 		// Nova linha criada
-		const emailCriado = valLinha[colEmailInteresse]
-		return emailCriado;
+		return true;
 	} else {
 		// Pegando os valores daquela linha da planilha gerencial, pois alguem pode responder mais de uma vez
 		// Nesse caso, não definiremos o primeiro item como null pois queremos manter os índices originais
@@ -181,6 +179,8 @@ function ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linha
 
 		// Juntando os dados já existentes da planilha gerencial com os novos dados
 		const intervaloUnido = JuntarDados(valLinhaGerencial, intervaloInserir);
+		Logger.log(valLinhaGerencial);
+		Logger.log(intervaloInserir);
 		
 		// Inserindo os campos na planilha gerencial
 		abaGerencial.getRange(linhaCampoGerencial, colNomeGerencial, 1, 9).setValues([intervaloUnido]);
@@ -195,20 +195,20 @@ function ImportarDadosMarcoZero(valLinha, linhaAtual, linhaCampoGerencial, linha
 	// Pegando o campo se está cadastrada na planilha de interesse
 	const respondeuInteresseMarcoZero = valLinha[colRespondeuInteresseMarcoZero];
 
+	// Considerando a ordem dos campos da planilha Gerencial (Ver ORDEM OBRIGATÓRIA DOS CAMPOS)
+	const intervaloInserir = [
+		valLinha[colNomeMarcoZero],
+		valLinha[colEmailMarcoZero],
+		valLinha[colTelMarcoZero],
+		null,
+		null,
+		valLinha[colWhatsMarcoZero],
+		respondeuInteresseMarcoZero,
+		"SIM"
+	]
+
 	// Se aquela pessoa ainda não estiver registrado na planilha gerencial
 	if (!linhaCampoGerencial) {
-		// Considerando a ordem dos campos da planilha Gerencial (Ver ORDEM OBRIGATÓRIA DOS CAMPOS)
-		const intervaloInserir = [
-			valLinha[colNomeMarcoZero],
-			valLinha[colEmailMarcoZero],
-			valLinha[colTelMarcoZero],
-			null,
-			null,
-			valLinha[colWhatsMarcoZero],
-			respondeuInteresseMarcoZero,
-			"SIM"
-		]
-
 		// Inserindo os campos na planilha gerencial
 		abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 8).setValues([intervaloInserir]);
 		InserirRedirecionamentoPlanilha(linhaVazia, colRedirectMarcoZeroGerencial, urlMarcoZero, linhaAtual);
@@ -219,13 +219,21 @@ function ImportarDadosMarcoZero(valLinha, linhaAtual, linhaCampoGerencial, linha
 		abaGerencial.getRange(linhaVazia, colRedirectInteresseGerencial).setBackground(corCampoSemDados);
 
 		// Nova linha criada
-		const emailCriado = valLinha[colEmailMarcoZero]
-		return emailCriado;
+		return true;
 	} else {
 		// Se a pessoa já estiver registrado na planilha gerencial
 		InserirRedirecionamentoPlanilha(linhaCampoGerencial, colRedirectMarcoZeroGerencial, urlMarcoZero, linhaAtual);
-		abaGerencial.getRange(linhaCampoGerencial, colRespondeuInteresseGerencial).setValue(respondeuInteresseMarcoZero);
 
+		// Pegando os valores daquela linha da planilha gerencial, pois alguem pode responder mais de uma vez
+		// Nesse caso, não definiremos o primeiro item como null pois queremos manter os índices originais
+		const valLinhaGerencial = abaGerencial.getRange(linhaCampoGerencial, colNomeGerencial, 1, 8).getValues()[0];
+
+		// Juntando os dados já existentes da planilha gerencial com os novos dados
+		const intervaloUnido = JuntarDados(valLinhaGerencial, intervaloInserir);
+
+		// Inserindo os campos na planilha gerencial
+		abaGerencial.getRange(linhaCampoGerencial, colNomeGerencial, 1, 8).setValues([intervaloUnido]);
+		
 		// Nenhuma linha criada
 		return false;
 	}
@@ -377,16 +385,16 @@ function SincronizarWhatsGerencial() {
 // Função que sincronizará um dado campo entre duas planilhas passadas
 function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, colDesejada2) {
 	// Atribui as variáveis de acordo com a abaDesejada1
-	const { ultimaLinha: ultimaLinha1, colEmail: colEmail1 } = objetoMap.get(abaDesejada1);
+	const { ultimaLinha: ultimaLinha1, colEmail: colEmail1, nome: nome1 } = objetoMap.get(abaDesejada1);
 	// Atribui as variáveis de acordo com a abaDesejada2
-	const { ultimaLinha: ultimaLinha2, colEmail: colEmail2 } = objetoMap.get(abaDesejada2);
+	const { ultimaLinha: ultimaLinha2, colEmail: colEmail2, nome: nome2 } = objetoMap.get(abaDesejada2);
 
 	// Pegando todos os emails da abaDesejada1 e abaDesejada2
 	const emailsTelefones1 = abaDesejada1.getRange(2, colEmail1, ultimaLinha1, 2).getValues();
 	const emailsTelefones2 = abaDesejada2.getRange(2, colEmail2, ultimaLinha2, 2).getValues();
 
 	const colsDesejadas1 = abaDesejada1.getRange(2, colDesejada1, ultimaLinha1, 1).getValues();
-	const colsDesejadas2 = abaDesejada1.getRange(2, colDesejada2, ultimaLinha2, 1).getValues();
+	const colsDesejadas2 = abaDesejada2.getRange(2, colDesejada2, ultimaLinha2, 1).getValues();
 
 	// Loop para percorrer as linhas da abaDesejada1
 	for (let i = 0; i < emailsTelefones1.length; i++) {
@@ -410,12 +418,16 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 			// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Desejada1
 			else if (!valDesejada2) colsDesejadas2[linhaCampoDesejada2 - 2][0] = valDesejada1;
 			// Se o campo do Desejada1 estiver como sim e da outra como não, altere o campo da outra planilha
-			else if (valDesejada1 == "SIM" && valDesejada2 == "NÃO") colsDesejadas2[linhaCampoDesejada2 - 2][0] = "SIM";
+			else if (valDesejada1 == "SIM") colsDesejadas2[linhaCampoDesejada2 - 2][0] = "SIM";
 			// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Desejada1
-			else if (valDesejada2 == "SIM" && valDesejada1 == "NÃO") colsDesejadas1[i][0] = "SIM";
+			else if (valDesejada2 == "SIM") colsDesejadas1[i][0] = "SIM";
 		}
 	}
-	
+	// Toast da mensagem do progresso de execução da função
+	const tituloToast ='50% concluído da função atual';
+	const textoToast = 'Sincronizando campo entre planilhas ' + nome1 + ' e ' + nome2;
+	planilhaAtiva.toast(textoToast, tituloToast, tempoNotificacao);
+
 	// Loop para percorrer as linhas da abaDesejada2 (Caso houver uma pessoa repetida na abaDesejada2)
 	for (let i = 0; i < emailsTelefones2.length; i++) {
 		let email = emailsTelefones2[i][0];
@@ -438,80 +450,59 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 			// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Desejada1
 			else if (!valDesejada2) colsDesejadas2[i][0] = valDesejada1;
 			// Se o campo do Desejada1 estiver como sim e da outra como não, altere o campo da outra planilha
-			else if (valDesejada1 == "SIM" && valDesejada2 == "NÃO") colsDesejadas2[linhaCampoDesejada1 - 2][0] = "SIM";
+			else if (valDesejada1 == "SIM") colsDesejadas2[i][0] = "SIM";
 			// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Desejada1
-			else if (valDesejada2 == "SIM" && valDesejada1 == "NÃO") colsDesejadas1[i][0] = "SIM";
+			else if (valDesejada2 == "SIM") colsDesejadas1[linhaCampoDesejada1 - 2][0] = "SIM";
 		}
 	}
-}
-
-// Função genérica que compara dois campos que possam conter "SIM" ou "NÃO" e sincroniza eles
-function CompararValoresEMarcar(celDesejada1, celDesejada2) {
-	const valDesejada1 = celDesejada1.getValue();
-	const valDesejada2 = celDesejada2.getValue();
-
-	// Se o campo do Desejada1 estiver vazio, altere o campo do Desejada1 com o valor da outra planilha
-	if (!valDesejada1) {
-		celDesejada1.setValue(valDesejada2);
-		return;
-	}
-
-	// Se o campo da outra planilha estiver vazio, altere o campo da outra planilha com o valor do Desejada1
-	if (!valDesejada2) {
-		celDesejada2.setValue(valDesejada1);
-		return;
-	}
-
-	// Se o campo do Desejada1 estiver como sim e da outra como não, altere o campo da outra planilha
-	if (valDesejada1 == "SIM" && valDesejada2 == "NÃO") {
-		celDesejada2.setValue("SIM");
-		return;
-	}
-
-	// Se o campo da outra planilha estiver como sim e da outra como não, altere o campo do Desejada1
-	if (valDesejada2 == "SIM" && valDesejada1 == "NÃO") {
-		celDesejada1.setValue("SIM");
-		return;
-	}
+	
+	// Inserindo os valores nas planilhas
+	abaDesejada1.getRange(2, colDesejada1, ultimaLinha1, 1).setValues(colsDesejadas1);
+	abaDesejada2.getRange(2, colDesejada2, ultimaLinha2, 1).setValues(colsDesejadas2);
 }
 
 //Função que verifica se a pessoa está cadastrada na planilha para verificar, e registra em outra planilha
 function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro, abaParaVerificar, valCustomizadoSim, valCustomizadoNao) {
-	// Atribui as variáveis de acordo com as abaDesejadas
+	// Atribui as variáveis de acordo com a abaDesejada1
+	const { ultimaLinha: ultimaLinhaVerificar, colEmail: colEmailVerificar, nome: nomeVerificar } = objetoMap.get(abaParaVerificar);
+	// Atribui as variáveis de acordo com a abaParaRegistro
 	const { ultimaLinha: ultimaLinhaRegistro, colEmail: colEmailRegistro, nome: nomeRegistro } = objetoMap.get(abaParaRegistro);
-	const { ultimaLinha: ultimaLinhaVerificar, colEmail: colEmailVerificar, nome: nomeDestino } = objetoMap.get(abaParaVerificar);
 
-	const emailsAbaRegistro = abaParaRegistro.getRange(2, colEmailRegistro, ultimaLinhaRegistro, 1).getValues().flat();
-	const emailsAbaVerificar = abaParaVerificar.getRange(2, colEmailVerificar, ultimaLinhaVerificar, 1).getValues().flat();
+	// Pegando todos os emails da abaParaVerificar e abaParaRegistro
+	const emailsTelefonesVerificar = abaParaVerificar.getRange(2, colEmailVerificar, ultimaLinhaVerificar, 2).getValues();
+	const emailsTelefonesRegistro = abaParaRegistro.getRange(2, colEmailRegistro, ultimaLinhaRegistro, 2).getValues();
 
-	//Pegar o email na planilha Desejada
-	for (let i = 2; i <= ultimaLinhaRegistro; i++) {
-		const celParaRegistro = abaParaRegistro.getRange(i, colParaRegistro);
-		const valParaRegistro = celParaRegistro.getValue();
+	const colsRegistro = abaParaRegistro.getRange(2, colParaRegistro, ultimaLinhaRegistro, 1).getValues();
 
-		// Se o campo já estiver marcado com sim, passe para o próximo
-		if (valParaRegistro == "SIM") continue;
-
-		let email = abaParaRegistro.getRange(i, colEmailRegistro).getValue();
+	// Loop para percorrer as linhas da abaParaRegistro
+	for (let i = 0; i < emailsTelefonesRegistro.length; i++) {
+		let email = emailsTelefonesRegistro[i][0];
+		let telefone = emailsTelefonesRegistro[i][1];
 
 		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
 
-		email = email.trim(); // Remove espaços em branco
+		email = NormalizarString(email);
 
 		// Toast da mensagem do progresso de execução da função
-		if (i % 100 === 0) {
+		if (i % 300 === 0) {
 			const tituloToast = Math.round(i / ultimaLinhaRegistro * 100) + '% concluído da função atual';
-			const textoToast = 'Processo na linha ' + i + ' da verificação da planilha ' + nomeRegistro + ' para ' + nomeDestino;
+			const textoToast = 'Processo na linha ' + i + ' da verificação da planilha ' + nomeRegistro + ' para ' + nomeVerificar;
 			planilhaAtiva.toast(textoToast, tituloToast, tempoNotificacao);
 		}
 
-		if (RetornarLinhaEmailDados(email, emailsAbaVerificar)) {
-			celParaRegistro.setValue(valCustomizadoSim ?? "SIM");
+		const existeNaAbaVerificar = RetornarLinhaDados(email, telefone, emailsTelefonesVerificar);
+
+		// Se o email for encontrado na outra planilha
+		if (existeNaAbaVerificar) {
+			colsRegistro[i][0] = valCustomizadoSim ?? "SIM";
 		} else {
-			celParaRegistro.setValue(valCustomizadoNao ?? "NÃO");
+			colsRegistro[i][0] = valCustomizadoNao ?? "NÃO";
 		}
 	}
+	
+	// Inserindo os valores na abaParaRegistro
+	abaParaRegistro.getRange(2, colParaRegistro, ultimaLinhaRegistro, 1).setValues(colsRegistro);
 }
 
 // Função que adiciona uma anotação no campo de anotações da planilha gerencial
@@ -557,11 +548,6 @@ function ImportarNotas(abaDesejada) {
 	}
 }
 
-// Função que chama a função de VerificarRepeticoes para ser utilizada no menu 
-function VerificarRepeticoesGerencial() {
-	VerificarRepeticoes(abaGerencial)
-}
-
 // Função que verifica se existe um email repetido
 function VerificarRepeticoes(abaDesejada) {
 	const { ultimaLinha, colEmail } = objetoMap.get(abaDesejada);
@@ -578,18 +564,43 @@ function VerificarRepeticoes(abaDesejada) {
 
 function JuntarDados(dadosLinha1, dadosLinha2){
 	let dadosConcatenados = [];
-	let dado1, dado2;
 
 	// dadosLinha1 e dadosLinha2, são arrays de uma linha de uma mesma planilha, portanto possuem o mesmo tamanho
 	for(let i = 0; i < dadosLinha1.length; i++){
-		dado1 = dadosLinha1[i];
-		dado2 = dadosLinha2[i];
-		// Se os dados forem diferentes, concatene os dois dados
-		if(dado2 && !CompararSimilaridade(dado1, dado2, 0.9)){
-			dadosConcatenados.push(dado1 + '; ' + dado2);
-		} else {
-			dadosConcatenados.push(dado1);
+		let possuiSimilaridade = false;
+		let dado1 = dadosLinha1[i];
+		let dado2 = dadosLinha2[i];
+
+		// Exceções especiais
+		if(dado1 == "ESPERA" && dado2){
+			dadosConcatenados.push(dado2);
+			continue;
 		}
+		if(dado2 == "ESPERA" && dado1){
+			dadosConcatenados.push(dado1);
+			continue;
+		}
+
+		// Se o dado1 não existir, adicione o dado2
+		if(!dado1) {
+			dadosConcatenados.push(dado2);
+			continue;
+		}
+		if(dado2) {
+			// Separe o texto pelo ; para caso o campo já tiver sido concatenado
+			const textosSeparados1 = dado1.split('; ');
+			
+			// Loop para comparar a similaridade para cada um dos textos
+			for(let texto of textosSeparados1){
+				if(CompararSimilaridade(texto, dado2, 0.9)) possuiSimilaridade = true;
+			}
+
+			if(!possuiSimilaridade) {
+				dadosConcatenados.push(dado1 + '; ' + dado2);
+				continue;
+			}
+		}
+		dadosConcatenados.push(dado1);
 	}
 
 	return dadosConcatenados;
