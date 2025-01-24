@@ -24,8 +24,8 @@ function onOpen(e) {
 // Função que verificará se o email existe na planilha desejada e retornará a linha
 function RetornarLinhaDados(emailProcurado, telefoneProcurado, dados) {
 	// Separando o email procurado pois ele pode ser um valor com mais de um email
-	const emailsProcuradosSeparados = emailProcurado.split('; ');
-	const telefonesPorcuradosSeparados = telefoneProcurado.split('; ');
+	const emailsProcuradosSeparados = emailProcurado ? emailProcurado.toString().split('; ') : [emailProcurado];
+	const telefonesPorcuradosSeparados = telefoneProcurado ? telefoneProcurado.toString().split('; ') : [telefoneProcurado];
 
 	// Conferir todos os emails da planilha desejada
 	for (let i = 0; i < dados.length; i++) {
@@ -84,14 +84,14 @@ function Importar() {
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaMarcoZero);
 
-	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
-	// totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
+	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
+	totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
 
-	// planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
-	// totalLinhasAfetadas += ImportarDados(abaMarcoFinal);
+	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Final', tempoNotificacao);
+	totalLinhasAfetadas += ImportarDados(abaMarcoFinal);
 
-	// planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
-	// totalLinhasAfetadas += ImportarDados(abaCertificado);
+	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio do Certificado', tempoNotificacao);
+	totalLinhasAfetadas += ImportarDados(abaCertificado);
 
 	const quantidadeLinhasCriadas = abaGerencial.getLastRow() - ultimaLinhaGerencial;
 	const mensagem = 'Fim da execução.\n' + quantidadeLinhasCriadas + ' linhas criadas e ' + totalLinhasAfetadas + ' linhas já registradas analisadas';
@@ -600,14 +600,18 @@ function VerificarRepeticoes(abaDesejada) {
 
 function JuntarDados(dadosLinha1, dadosLinha2){
 	let dadosConcatenados = [];
+	const colunasDeExcecao = [5, 6, 7, 8]; // Cadastrado whats, respondeu interesse, respondeu marco zero, situacao
 
-	// dadosLinha1 e dadosLinha2, são arrays de uma linha de uma mesma planilha, portanto possuem o mesmo tamanho
-	for(let i = 0; i < dadosLinha1.length; i++){
+	for (let i = 0; i < dadosLinha1.length; i++) {
 		let possuiSimilaridade = false;
 		let dado1 = dadosLinha1[i];
 		let dado2 = dadosLinha2[i];
 
 		// Exceções especiais
+		// if (colunasDeExcecao.includes(i)) {
+		// 	dadosConcatenados.push(dado2);
+		// 	continue;
+		// }
 		if(dado1 == "ESPERA" && dado2){
 			dadosConcatenados.push(dado2);
 			continue;
@@ -624,7 +628,7 @@ function JuntarDados(dadosLinha1, dadosLinha2){
 		}
 		if(dado2) {
 			// Separe o texto pelo ; para caso o campo já tiver sido concatenado
-			const textosSeparados1 = dado1.split('; ');
+			const textosSeparados1 = dado1.toString().split('; ');
 			
 			// Loop para comparar a similaridade para cada um dos textos
 			for(let texto of textosSeparados1){
