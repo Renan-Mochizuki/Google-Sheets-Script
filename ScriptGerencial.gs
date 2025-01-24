@@ -22,35 +22,36 @@ function onOpen(e) {
 
 
 // Função que verificará se o email existe na planilha desejada e retornará a linha
-function RetornarLinhaEmailDados(emailProcurado, dados) {
-	//Conferir todos os emails da planilha desejada
-	for (let i = 0; i < dados.length; i++) {
-		if (!dados[i] || typeof dados[i] !== 'string') continue;
-
-		// Se o email for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-		if (CompararSimilaridade(NormalizarString(emailProcurado), NormalizarString(dados[i]))) return i + 2;
-	}
-	// Se não for encontrado nenhum 
-	return false;
-}
-
-// Função que verificará se o email existe na planilha desejada e retornará a linha
 function RetornarLinhaDados(emailProcurado, telefoneProcurado, dados) {
-	let email, telefone;
+	// Separando o email procurado pois ele pode ser um valor com mais de um email
+	const emailsProcuradosSeparados = emailProcurado.split('; ');
+	const telefonesPorcuradosSeparados = telefoneProcurado.split('; ');
 
 	// Conferir todos os emails da planilha desejada
 	for (let i = 0; i < dados.length; i++) {
-		email = dados[i][0];
-		telefone = dados[i][1];
+		const emailDados = dados[i][0];
+		const telefoneDados = dados[i][1];
 
-		if (email && typeof email !== 'string'){
-			// Se o email for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-			if (CompararSimilaridade(NormalizarString(emailProcurado), NormalizarString(email))) return i + 2;
+		if (emailDados && typeof emailDados !== 'string'){
+			const emailsSeparados = emailDados.split('; ');
+
+			for (let emailSeparado of emailsSeparados){
+				for(let emailProcuradoSeparado of emailsProcuradosSeparados){
+					// Se o email for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
+					if (CompararSimilaridade(NormalizarString(emailProcuradoSeparado), NormalizarString(emailSeparado))) return i + 2;
+				}
+			}
 		}
 		
-		if(telefone){
-			// Se o telefone for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-			if (CompararSimilaridade(NormalizarString(telefoneProcurado), NormalizarString(telefone), 0.9)) return i + 2;
+		if(telefoneDados){
+			const telefonesSeparados = telefoneDados.toString().split('; ');
+
+			for (let telefoneSeparado of telefonesSeparados){
+				for(let telefoneProcuradoSeparado of telefonesPorcuradosSeparados){
+					// Se o telefone for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
+					if (CompararSimilaridade(NormalizarString(telefoneProcuradoSeparado), NormalizarString(telefoneSeparado), 0.9)) return i + 2;
+				}
+			}
 		}
 	}
 	// Se não for encontrado nenhum 
@@ -77,6 +78,7 @@ function Importar() {
 	planilhaAtiva.toast(tituloToast, 'Importando dados da Interesse', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaInteresse);
 
+	planilhaAtiva.toast(tituloToast, 'Importando notas da Interesse', tempoNotificacao);
 	ImportarNotas(abaInteresse);
 	
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
@@ -135,11 +137,12 @@ function ImportarDados(abaDesejada) {
 		if (foiCastradoNovoEmail) {
 			linhaVazia++;
 			// Insira o novo email e tel na matriz de dados (Se o primeiro item estiver vazio, substitua o item vazio)
-			if(emailsTelefones[0][0] || emailsTelefones[0][1]){
-				emailsTelefones.push([email, telefone]);
-			} else {
+			if(!emailsTelefones[0][0] && !emailsTelefones[0][1]){
 				emailsTelefones[0] = [email, telefone];
+				continue;
 			}
+
+			emailsTelefones.push([email, telefone]);
 		}
 		else linhasAfetadas++;
 	}
@@ -522,30 +525,63 @@ function AdicionarAnotacaoGerencial(linhaInserir, anotacaoInserir) {
 function ImportarNotas(abaDesejada) {
 	// Atribui as variáveis de acordo com a abaDesejada
 	const { ultimaLinha, colEmail } = objetoMap.get(abaDesejada);
+	const ultimaLinhaGerencial = abaGerencial.getLastRow();
 
-	// Pega todos os valores da coluna desejada
-	const notasColunas = abaDesejada.getRange(2, colEmail, ultimaLinha, 1).getNotes().flat();
+	let anotacoesGerencial = abaGerencial.getRange(2, colAnotacaoGerencial, ultimaLinhaGerencial, 1).getValues().flat();
+	let emailsTelefonesGerencial = abaGerencial.getRange(2, colEmailGerencial, ultimaLinhaGerencial, 2).getValues();
 
-	for (let i = 0; i < notasColunas.length; i++) {
-		const anotacao = notasColunas[i];
+	const notasColunasAbaDesejada = abaDesejada.getRange(2, colEmail, ultimaLinha, 1).getNotes().flat();
+	const emailsTelefonesAbaDesejada = abaDesejada.getRange(2, colEmail, ultimaLinha, 2).getValues();
 
-		if (!anotacao) continue;
+	for (let i = 0; i < notasColunasAbaDesejada.length; i++) {
+		const notaDesejada = notasColunasAbaDesejada[i];
 
-		// i + 2, pois a array começa em 0 e a planilha começa em 2 
-		AdicionarAnotacaoGerencial(i + 2, anotacao);
+		if (!notaDesejada) continue;
 
-		// Regex para verificar se há um email escrito na anotação
-		const regexEmail = /([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})/;
-		const emailEncontrado = anotacao.match(regexEmail);
+		let email = emailsTelefonesAbaDesejada[i][0];
+		let telefone = emailsTelefonesAbaDesejada[i][1];
 
-		if (emailEncontrado) {
-			// Pegue a nota da abaGerencial, se já existir, adicione um ponto e vírgula e o email, se não, apenas atribua o email encontrado
-			const notaGerencial = abaGerencial.getRange(i + 2, colEmail).getNote();
-			const notaInserir = notaGerencial ? notaGerencial + '; ' + emailEncontrado[0] : emailEncontrado[0];
+		if(!email || email.toLowerCase().includes("teste")) continue;
 
-			abaGerencial.getRange(i + 2, colEmail).setNote(notaInserir);
+		email = NormalizarString(email);
+
+		const linhaCampoGerencial = RetornarLinhaDados(email, telefone, emailsTelefonesGerencial);
+
+		if (!linhaCampoGerencial){
+			planilhaAtiva.toast('Email não encontrado na planilha gerencial: ' + email, 'Erro', tempoNotificacao);
+			continue;
+		}
+
+		const anotacaoGerencial = anotacoesGerencial[linhaCampoGerencial - 2];
+		let notaInserir;
+
+		// Se já existir uma anotação na gerencial, e ainda não conter a notaDesejada
+
+		if (anotacaoGerencial){
+			if(!(anotacaoGerencial.split(';').includes(notaDesejada))) {
+				notaInserir = anotacaoGerencial + '; ' + notaDesejada;
+			} else{
+				notaInserir = anotacaoGerencial;
+			}
+		} else {
+			notaInserir = notaDesejada;
+		}
+
+		anotacoesGerencial[linhaCampoGerencial - 2] = notaInserir;
+
+		const emailGerencial = emailsTelefonesGerencial[linhaCampoGerencial - 2][0];
+		const regex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+		const emailsDaNota = notaDesejada.match(regex) || [];
+	
+		for(let emailNota of emailsDaNota){
+			if(!emailGerencial.includes(emailNota)){
+				emailsTelefonesGerencial[linhaCampoGerencial - 2][0] = emailGerencial + '; ' + emailNota;
+			}
 		}
 	}
+
+	abaGerencial.getRange(2, colAnotacaoGerencial, ultimaLinhaGerencial, 1).setValues(anotacoesGerencial.map(nota => [nota])); // Revertendo o .flat()
+	abaGerencial.getRange(2, colEmailGerencial, ultimaLinhaGerencial, 2).setValues(emailsTelefonesGerencial);
 }
 
 // Função que verifica se existe um email repetido
