@@ -24,32 +24,32 @@ function onOpen(e) {
 // Função que verificará se o email existe na planilha desejada e retornará a linha
 function RetornarLinhaDados(emailProcurado, telefoneProcurado, dados) {
 	// Separando o email procurado pois ele pode ser um valor com mais de um email
-	const emailsProcuradosSeparados = emailProcurado ? emailProcurado.toString().split('; ') : [emailProcurado];
-	const telefonesPorcuradosSeparados = telefoneProcurado ? telefoneProcurado.toString().split('; ') : [telefoneProcurado];
+	const emailsProcuradosSeparados = emailProcurado ? NormalizarString(emailProcurado).split(';') : [NormalizarString(emailProcurado)];
+	const telefonesPorcuradosSeparados = telefoneProcurado ? telefoneProcurado.toString().split(';') : [telefoneProcurado];
 
 	// Conferir todos os emails da planilha desejada
 	for (let i = 0; i < dados.length; i++) {
 		const emailDados = dados[i][0];
 		const telefoneDados = dados[i][1];
 
-		if (emailDados && typeof emailDados !== 'string'){
-			const emailsSeparados = emailDados.split('; ');
+		if (emailDados && typeof emailDados === 'string'){
+			const emailsSeparados = emailDados.split(';');
 
 			for (let emailSeparado of emailsSeparados){
 				for(let emailProcuradoSeparado of emailsProcuradosSeparados){
 					// Se o email for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-					if (CompararSimilaridade(NormalizarString(emailProcuradoSeparado), NormalizarString(emailSeparado))) return i + 2;
+					if (CompararSimilaridade(emailProcuradoSeparado, emailSeparado)) return i + 2;
 				}
 			}
 		}
 		
 		if(telefoneDados){
-			const telefonesSeparados = telefoneDados.toString().split('; ');
+			const telefonesSeparados = telefoneDados.toString().split(';');
 
 			for (let telefoneSeparado of telefonesSeparados){
 				for(let telefoneProcuradoSeparado of telefonesPorcuradosSeparados){
 					// Se o telefone for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-					if (CompararSimilaridade(NormalizarString(telefoneProcuradoSeparado), NormalizarString(telefoneSeparado), 0.9)) return i + 2;
+					if (CompararSimilaridade(telefoneProcuradoSeparado, telefoneSeparado, 0.9)) return i + 2;
 				}
 			}
 		}
@@ -117,13 +117,11 @@ function ImportarDados(abaDesejada) {
 		// Pegando os valores da linha e definindo o primeiro item como null para podermos acessar os índices sem precisar subtrair 1
 		const valLinha = [null, ...abaDesejada.getRange(i, 1, 1, ultimaColuna).getValues()[0]];
 
-		let email = valLinha[colEmail];
-		let telefone = valLinha[colTel]
+		const email = valLinha[colEmail];
+		const telefone = valLinha[colTel]
 
 		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
-
-		email = NormalizarString(email);
 
 		// Toast da mensagem do progresso de execução da função
 		if (i % 100 === 0) {
@@ -155,6 +153,8 @@ function ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linha
 	// Declarando uma array com os campos adicionais da planilha Interesse com "SIM" para o campo "Respondeu Interesse" na Gerencial
 	// Considerando a ordem dos campos da planilha Gerencial (Ver ORDEM OBRIGATÓRIA DOS CAMPOS)
 	const intervaloInserir = [
+		valLinha[colAnotacaoInteresse],
+		null,
 		valLinha[colNomeInteresse],
 		valLinha[colEmailInteresse],
 		valLinha[colTelInteresse],
@@ -169,24 +169,21 @@ function ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linha
 	// Se aquele email ainda não estiver registrado na planilha gerencial
 	if (!linhaCampoGerencial) {
 		// Inserindo os campos na planilha gerencial
-		abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 9).setValues([intervaloInserir]);
+		abaGerencial.getRange(linhaVazia, colAnotacaoGerencial, 1, 11).setValues([intervaloInserir]);
 		InserirRedirecionamentoPlanilha(linhaVazia, colRedirectInteresseGerencial, urlInteresse, linhaAtual);
-		AdicionarAnotacaoGerencial(linhaVazia, valLinha[colAnotacaoInteresse]);
 
 		// Nova linha criada
 		return true;
 	} else {
 		// Pegando os valores daquela linha da planilha gerencial, pois alguem pode responder mais de uma vez
 		// Nesse caso, não definiremos o primeiro item como null pois queremos manter os índices originais
-		const valLinhaGerencial = abaGerencial.getRange(linhaCampoGerencial, colNomeGerencial, 1, 9).getValues()[0];
+		const valLinhaGerencial = abaGerencial.getRange(linhaCampoGerencial, colAnotacaoGerencial, 1, 11).getValues()[0];
 
 		// Juntando os dados já existentes da planilha gerencial com os novos dados
-		const intervaloUnido = JuntarDados(valLinhaGerencial, intervaloInserir);
-		Logger.log(valLinhaGerencial);
-		Logger.log(intervaloInserir);
+		const intervaloUnido = JuntarDados(valLinhaGerencial, intervaloInserir, colAnotacaoGerencial);
 		
 		// Inserindo os campos na planilha gerencial
-		abaGerencial.getRange(linhaCampoGerencial, colNomeGerencial, 1, 9).setValues([intervaloUnido]);
+		abaGerencial.getRange(linhaCampoGerencial, colAnotacaoGerencial, 1, 11).setValues([intervaloUnido]);
 		
 		// Nenhuma linha criada
 		return false;
@@ -232,7 +229,7 @@ function ImportarDadosMarcoZero(valLinha, linhaAtual, linhaCampoGerencial, linha
 		const valLinhaGerencial = abaGerencial.getRange(linhaCampoGerencial, colNomeGerencial, 1, 8).getValues()[0];
 
 		// Juntando os dados já existentes da planilha gerencial com os novos dados
-		const intervaloUnido = JuntarDados(valLinhaGerencial, intervaloInserir);
+		const intervaloUnido = JuntarDados(valLinhaGerencial, intervaloInserir, colNomeGerencial);
 
 		// Inserindo os campos na planilha gerencial
 		abaGerencial.getRange(linhaCampoGerencial, colNomeGerencial, 1, 8).setValues([intervaloUnido]);
@@ -248,8 +245,7 @@ function ImportarDadosEnvioMapa(valLinha, linhaAtual, linhaCampoGerencial, linha
 	if (!linhaCampoGerencial) {
 		LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaEnvioMapa);
 		// Nova linha criada
-		const emailCriado = valLinha[colEmailMarcoZero]
-		return emailCriado;
+		return true;
 	}
 
 	const dataMapa = valLinha[colDataEnvioMapa];
@@ -281,8 +277,7 @@ function ImportarDadosMarcoFinal(valLinha, linhaAtual, linhaCampoGerencial, linh
 	if (!linhaCampoGerencial) {
 		LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaMarcoFinal);
 		// Nova linha criada
-		const emailCriado = valLinha[colEmailMarcoZero]
-		return emailCriado;
+		return true;
 	}
 
 	const enviouReflexaoMarcoFinal = (valLinha[colEnviouReflexaoMarcoFinal] || '').toUpperCase();
@@ -308,10 +303,8 @@ function ImportarDadosCertificado(valLinha, linhaAtual, linhaCampoGerencial, lin
 	// Se aquele email ainda não estiver registrado na planilha gerencial
 	if (!linhaCampoGerencial) {
 		LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaCertificado);
-		AdicionarAnotacaoGerencial(linhaAtual,);
 		// Nova linha criada
-		const emailCriado = valLinha[colEmailCertificado]
-		return emailCriado;
+		return true;
 	}
 
 	const linkTestadoCertificado = (valLinha[colLinkTestadoCertificado] || '').toUpperCase();
@@ -346,12 +339,14 @@ function LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaDeseja
 
 	// Considerando a ordem dos campos da planilha Gerencial (Ver ORDEM OBRIGATÓRIA DOS CAMPOS)
 	const intervaloInserir = [
+		"Pessoa não cadastrada nas outras planilhas",
+		null,
 		valLinha[colNome],
 		valLinha[colEmail],
 		valLinha[colTel]
 	]
 
-	abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 3).setValues([intervaloInserir]);
+	abaGerencial.getRange(linhaVazia, colAnotacaoGerencial, 1, 5).setValues([intervaloInserir]);
 
 	// Preencher os outros dados da planilha
 	ImportarDadosPlanilha(valLinha, linhaAtual, linhaVazia, linhaVazia + 1);
@@ -371,8 +366,7 @@ function InserirRedirecionamentoPlanilha(linhaInserir, colInserir, urlDestino, l
 	const urlRedirecionamento = `https://docs.google.com/spreadsheets/d/${planilhaID}/edit#gid=${abaID}&range=A${linhaDestino}`;
 
 	// Adiciona um link para redirecionamento na planilha gerencial
-	abaGerencial.getRange(linhaInserir, colInserir).setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
-	abaGerencial.getRange(linhaInserir, colInserir).setValue(urlRedirecionamento);
+	abaGerencial.getRange(linhaInserir, colInserir).setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP).setValue(urlRedirecionamento);
 }
 
 // Função que sincronizará quem entrou no whatsapp entre as três planilhas
@@ -401,13 +395,11 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 
 	// Loop para percorrer as linhas da abaDesejada1
 	for (let i = 0; i < emailsTelefones1.length; i++) {
-		let email = emailsTelefones1[i][0];
-		let telefone = emailsTelefones1[i][1];
+		const email = emailsTelefones1[i][0];
+		const telefone = emailsTelefones1[i][1];
 
 		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
-
-		email = NormalizarString(email);
 
 		// Pegue a linha do campo na planilha desejada 2
 		const linhaCampoDesejada2 = RetornarLinhaDados(email, telefone, emailsTelefones2);
@@ -433,13 +425,11 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
 
 	// Loop para percorrer as linhas da abaDesejada2 (Caso houver uma pessoa repetida na abaDesejada2)
 	for (let i = 0; i < emailsTelefones2.length; i++) {
-		let email = emailsTelefones2[i][0];
-		let telefone = emailsTelefones2[i][1];
+		const email = emailsTelefones2[i][0];
+		const telefone = emailsTelefones2[i][1];
 
 		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
-
-		email = NormalizarString(email);
 
 		// Pegue a linha do campo na planilha desejada 1
 		const linhaCampoDesejada1 = RetornarLinhaDados(email, telefone, emailsTelefones1);
@@ -479,13 +469,11 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
 
 	// Loop para percorrer as linhas da abaParaRegistro
 	for (let i = 0; i < emailsTelefonesRegistro.length; i++) {
-		let email = emailsTelefonesRegistro[i][0];
-		let telefone = emailsTelefonesRegistro[i][1];
+		const email = emailsTelefonesRegistro[i][0];
+		const telefone = emailsTelefonesRegistro[i][1];
 
 		// Se não existir email, ou for o "teste" passe para o próximo
 		if (!email || email.toLowerCase().includes("teste")) continue;
-
-		email = NormalizarString(email);
 
 		// Toast da mensagem do progresso de execução da função
 		if (i % 300 === 0) {
@@ -508,19 +496,6 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
 	abaParaRegistro.getRange(2, colParaRegistro, ultimaLinhaRegistro, 1).setValues(colsRegistro);
 }
 
-// Função que adiciona uma anotação no campo de anotações da planilha gerencial
-function AdicionarAnotacaoGerencial(linhaInserir, anotacaoInserir) {
-	// Se a anotacaoInserir existir e não for uma data
-	if (anotacaoInserir && !(anotacaoInserir instanceof Date)) {
-		const anotacaoGerencial = abaGerencial.getRange(linhaInserir, colAnotacaoGerencial).getValue();
-		// Adicione um ponto e vírgula, para adicionar outra anotação se aquela anotação ainda não existir
-		if (anotacaoGerencial && !(anotacaoGerencial.split(';').includes(anotacaoInserir))) {
-			anotacaoInserir = anotacaoGerencial + '; ' + anotacaoInserir;
-		}
-		abaGerencial.getRange(linhaInserir, colAnotacaoGerencial).setValue(anotacaoInserir);
-	}
-}
-
 // Função que importa as anotações
 function ImportarNotas(abaDesejada) {
 	// Atribui as variáveis de acordo com a abaDesejada
@@ -538,12 +513,10 @@ function ImportarNotas(abaDesejada) {
 
 		if (!notaDesejada) continue;
 
-		let email = emailsTelefonesAbaDesejada[i][0];
-		let telefone = emailsTelefonesAbaDesejada[i][1];
+		const email = emailsTelefonesAbaDesejada[i][0];
+		const telefone = emailsTelefonesAbaDesejada[i][1];
 
 		if(!email || email.toLowerCase().includes("teste")) continue;
-
-		email = NormalizarString(email);
 
 		const linhaCampoGerencial = RetornarLinhaDados(email, telefone, emailsTelefonesGerencial);
 
@@ -598,26 +571,26 @@ function VerificarRepeticoes(abaDesejada) {
 }
 
 
-function JuntarDados(dadosLinha1, dadosLinha2){
+function JuntarDados(dadosLinha1, dadosLinha2, primeiraColunaDoIntervalo){
+
+	const primeiraColuna = primeiraColunaDoIntervalo ?? colNomeGerencial;
+
 	let dadosConcatenados = [];
-	const colunasDeExcecao = [5, 6, 7, 8]; // Cadastrado whats, respondeu interesse, respondeu marco zero, situacao
+	const colunasDeSimNao = [colTerminouCursoGerencial, colWhatsGerencial, colRespondeuInteresseGerencial, colRespondeuMarcoZeroGerencial, colComentarioEnviadoMapaGerencial, colRespondeuMarcoFinalGerencial, colEnviouReflexaoMarcoFinalGerencial, colComentarioEnviadoMarcoFinalGerencial, colLinkTestadoCertificadoGerencial, colEntrouGrupoCertificadoGerencial];
 
 	for (let i = 0; i < dadosLinha1.length; i++) {
+		const colunaAtual = i + primeiraColuna;
 		let possuiSimilaridade = false;
 		let dado1 = dadosLinha1[i];
 		let dado2 = dadosLinha2[i];
 
 		// Exceções especiais
-		// if (colunasDeExcecao.includes(i)) {
-		// 	dadosConcatenados.push(dado2);
-		// 	continue;
-		// }
-		if(dado1 == "ESPERA" && dado2){
-			dadosConcatenados.push(dado2);
+		if(colunasDeSimNao.includes(colunaAtual)){
+			dadosConcatenados.push(RetornarValorSimNao(dado1, dado2));
 			continue;
 		}
-		if(dado2 == "ESPERA" && dado1){
-			dadosConcatenados.push(dado1);
+		if(colunaAtual == colSituacaoGerencial){
+			dadosConcatenados.push(RetornarTurmaMaisRecente(dado1, dado2));
 			continue;
 		}
 
@@ -628,7 +601,7 @@ function JuntarDados(dadosLinha1, dadosLinha2){
 		}
 		if(dado2) {
 			// Separe o texto pelo ; para caso o campo já tiver sido concatenado
-			const textosSeparados1 = dado1.toString().split('; ');
+			const textosSeparados1 = dado1.toString().split(';');
 			
 			// Loop para comparar a similaridade para cada um dos textos
 			for(let texto of textosSeparados1){
@@ -646,6 +619,35 @@ function JuntarDados(dadosLinha1, dadosLinha2){
 	return dadosConcatenados;
 }
 
+function RetornarTurmaMaisRecente(string1, string2) {
+	// Se uma string não existir, ou for 'ESPERA', retorne a outra
+	if (!string1 || string1 === 'ESPERA') return string2;
+	if (!string2 || string2 === 'ESPERA') return string1;
+
+	// Separar os números antes do traço (T01-2024 => 01; 2024)
+	const regex = /(\d+)-(\d+)/;
+	const match1 = string1.match(regex);
+	const match2 = string2.match(regex);
+
+	if (!match1 || !match2) return string1;
+
+	// Verificar qual ano é maior
+	if(match1[2] > match2[2]) return string1;
+	if(match1[2] < match2[2]) return string2;
+
+	// Anos iguais, verificar qual turma é maior
+	if(match1[1] > match2[1]) return string1;
+	if(match1[1] < match2[1]) return string2;
+
+	return string1;
+}
+
+function RetornarValorSimNao(valor1, valor2){
+	if(!valor1) return valor2;
+	if(!valor2) return valor1;
+	if(valor1 == "SIM" || valor2 == "SIM") return "SIM";
+	return valor1;
+}
 
 function CriaContatos() {
 	// for para percorrer todas as linhas

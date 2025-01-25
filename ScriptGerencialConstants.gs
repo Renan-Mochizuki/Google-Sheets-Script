@@ -363,10 +363,12 @@ const objetoMap = new Map([
 
 // Função que remove acentos e normaliza uma string
 function NormalizarString(str) {
-  if (typeof str !== 'string') return str;
+  if (!str) return str;
   return str
+    .toString()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .trim()
     .toLowerCase();
 }
 
@@ -395,8 +397,8 @@ function CalcularLevenshtein(str1, str2) {
 }
 
 function CompararSimilaridade(str1, str2, argTolerance) {
-  str1 = String(str1);
-  str2 = String(str2);
+  str1 = NormalizarString(str1);
+  str2 = NormalizarString(str2);
 
   let longer = str1;
   let shorter = str2;
