@@ -21,6 +21,8 @@ function onOpen(e) {
 // VEJA OS COMENTÁRIOS DO ARQUIVO CONSTANTS
 
 
+// TODO: Verificar se o nome bate 
+
 // Função que verificará se o email existe na planilha desejada e retornará a linha
 function RetornarLinhaDados(emailProcurado, telefoneProcurado, dados) {
 	// Separando o email procurado pois ele pode ser um valor com mais de um email
@@ -36,9 +38,15 @@ function RetornarLinhaDados(emailProcurado, telefoneProcurado, dados) {
 			const emailsSeparados = emailDados.split(';');
 
 			for (let emailSeparado of emailsSeparados){
+				// Pegar apenas o email sem o domínio
+				if(emailSeparado.includes('@')) emailSeparado = emailSeparado.split('@')[0];
+
 				for(let emailProcuradoSeparado of emailsProcuradosSeparados){
+					// Pegar apenas o email sem o domínio
+					if(emailProcuradoSeparado.includes('@')) emailProcuradoSeparado = emailProcuradoSeparado.split('@')[0];
+
 					// Se o email for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-					if (CompararSimilaridade(emailProcuradoSeparado, emailSeparado)) return i + 2;
+					if (CompararSimilaridade(emailProcuradoSeparado, emailSeparado, 0.8)) return i + 2;
 				}
 			}
 		}
@@ -80,9 +88,20 @@ function Importar() {
 
 	planilhaAtiva.toast(tituloToast, 'Importando notas da Interesse', tempoNotificacao);
 	ImportarNotas(abaInteresse);
+
+	const ultimaLinhaDepoisDaInteresse = abaGerencial.getLastRow();
 	
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Marco Zero', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaMarcoZero);
+
+	const ultimaLinhaDepoisDoMarcoZero = abaGerencial.getLastRow();
+	const intervaloInicioPintar = ultimaLinhaDepoisDaInteresse + 1;
+	const intervaloFimPintar = ultimaLinhaDepoisDoMarcoZero - intervaloInicioPintar + 1;
+
+	// Pintando campos cidade e estado, situação e redirecionamento para interesse das pessoas de S. PÚBLICA (esses campos nunca terão valor)
+	abaGerencial.getRange(intervaloInicioPintar, colCidadeGerencial, intervaloFimPintar, 2).setBackground(corCampoSemDados);
+	abaGerencial.getRange(intervaloInicioPintar, colSituacaoGerencial, intervaloFimPintar, 1).setBackground(corCampoSemDados);
+	abaGerencial.getRange(intervaloInicioPintar, colRedirectInteresseGerencial, intervaloFimPintar, 1).setBackground(corCampoSemDados);
 
 	planilhaAtiva.toast(tituloToast, 'Importando dados do Envio de Mapa', tempoNotificacao);
 	totalLinhasAfetadas += ImportarDados(abaEnvioMapa);
@@ -212,11 +231,6 @@ function ImportarDadosMarcoZero(valLinha, linhaAtual, linhaCampoGerencial, linha
 		// Inserindo os campos na planilha gerencial
 		abaGerencial.getRange(linhaVazia, colNomeGerencial, 1, 8).setValues([intervaloInserir]);
 		InserirRedirecionamentoPlanilha(linhaVazia, colRedirectMarcoZeroGerencial, urlMarcoZero, linhaAtual);
-
-		// Pintando campos cidade e estado, situação e redirecionamento para interesse
-		abaGerencial.getRange(linhaVazia, colCidadeGerencial, 1, 2).setBackground(corCampoSemDados);
-		abaGerencial.getRange(linhaVazia, colSituacaoGerencial).setBackground(corCampoSemDados);
-		abaGerencial.getRange(linhaVazia, colRedirectInteresseGerencial).setBackground(corCampoSemDados);
 
 		// Nova linha criada
 		return true;
