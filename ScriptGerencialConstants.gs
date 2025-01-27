@@ -265,7 +265,7 @@ const objetoMap = new Map([
   [
     abaInteresse,
     {
-      nome: 'Interesse',
+      nomePlanilha: 'Interesse',
       url: urlInteresse,
       ultimaLinhaAnalisada: ultimaLinhaAnalisadaInteresse,
       ultimaLinha: ultimaLinhaInteresse,
@@ -281,7 +281,7 @@ const objetoMap = new Map([
   [
     abaMarcoZero,
     {
-      nome: 'Marco Zero',
+      nomePlanilha: 'Marco Zero',
       url: urlMarcoZero,
       ultimaLinhaAnalisada: ultimaLinhaAnalisadaMarcoZero,
       ultimaLinha: ultimaLinhaMarcoZero,
@@ -295,7 +295,7 @@ const objetoMap = new Map([
   [
     abaEnvioMapa,
     {
-      nome: 'Envio do Mapa',
+      nomePlanilha: 'Envio do Mapa',
       url: urlEnvioMapa,
       ultimaLinhaAnalisada: ultimaLinhaAnalisadaEnvioMapa,
       ultimaLinha: ultimaLinhaEnvioMapa,
@@ -309,7 +309,7 @@ const objetoMap = new Map([
   [
     abaMarcoFinal,
     {
-      nome: 'Marco Final',
+      nomePlanilha: 'Marco Final',
       url: urlMarcoFinal,
       ultimaLinhaAnalisada: ultimaLinhaAnalisadaMarcoFinal,
       ultimaLinha: ultimaLinhaMarcoFinal,
@@ -323,7 +323,7 @@ const objetoMap = new Map([
   [
     abaCertificado,
     {
-      nome: 'Envio do Certificado',
+      nomePlanilha: 'Envio do Certificado',
       url: urlCertificado,
       ultimaLinhaAnalisada: ultimaLinhaAnalisadaCertificado,
       ultimaLinha: ultimaLinhaCertificado,
@@ -337,7 +337,7 @@ const objetoMap = new Map([
   [
     abaGerencial,
     {
-      nome: 'Gerencial',
+      nomePlanilha: 'Gerencial',
       url: urlGerencial,
       ultimaLinha: ultimaLinhaGerencial,
       ultimaColuna: ultimaColunaGerencial,
@@ -351,7 +351,7 @@ const objetoMap = new Map([
   [
     abaAtiva,
     {
-      nome: 'Ativa',
+      nomePlanilha: 'Ativa',
       ultimaLinha: ultimaLinhaAtiva,
       ultimaColuna: ultimaColunaAtiva,
       colNome: colNomeAtiva,
