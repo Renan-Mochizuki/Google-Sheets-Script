@@ -35,7 +35,11 @@ function RetornarLinhaDados(nomeProcurado, emailProcurado, telefoneProcurado, da
 		const telefoneDados = dados[i][2];
 
 		if(VerificarLinhaDados(emailDados, emailsProcuradosSeparados, 0.8)){
-			if(VerificarLinhaDados(telefoneDados, telefonesProcuradosSeparados, 0.8) || VerificarLinhaDados(nomeDados, nomesProcuradosSeparados, 0.5)){
+			const resultadoVerificacaoTel = VerificarLinhaDados(telefoneDados, telefonesProcuradosSeparados, 0.8);
+
+			if(VerificarLinhaDados(nomeDados, nomesProcuradosSeparados, 0.5)){
+				if(resultadoVerificacaoTel === 0) continue;
+				
 				return i + 2;
 			}
 		}
@@ -66,8 +70,10 @@ function VerificarLinhaDados(dadosCampo, dadosProcuradosSeparados, tolerancia){
 
 			// Se o telefone for encontrado, retorne o indice da array + 2 (Porque a array começa em 0 e a planilha em 2)
 			if (CompararSimilaridade(dadoProcuradoSeparado, dadoSeparado, tolerancia)) {
-				Logger.log('Dado encontrado: ' + dadoProcuradoSeparado + ' - ' + dadoSeparado);
 				return true;
+			}
+			if(dadoProcuradoSeparado.includes('+') != dadoSeparado.includes('+')){
+				return 0;
 			}
 		}
 	}
