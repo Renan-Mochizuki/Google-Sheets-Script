@@ -21,7 +21,6 @@
 //    estados, tempoNotificacao, corCampoSemDados
 //    e objetoMap (utilizado para generalizar o código)
 
-
 // Função que recebe o nome da coluna e transforma em número (Ex.: A = 1; Z = 26; AA = 27; AB = 28)
 function Coluna(letras) {
   let numero = 0;
@@ -146,7 +145,7 @@ const planilhaMarcoFinal = SpreadsheetApp.openByUrl(urlMarcoFinal);
 const abaMarcoFinal = planilhaMarcoFinal.getSheets()[0];
 const planilhaCertificado = SpreadsheetApp.openByUrl(urlCertificado);
 const abaCertificado = planilhaCertificado.getSheets()[0];
-const planilhaGerencial = SpreadsheetApp.getActiveSpreadsheet();
+const planilhaGerencial = SpreadsheetApp.openByUrl(urlGerencial);
 const abaGerencial = planilhaGerencial.getSheets()[0];
 
 // Captura as últimas linhas e colunas

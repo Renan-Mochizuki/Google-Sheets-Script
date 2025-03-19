@@ -78,16 +78,15 @@ function FormatarLinhasTelefoneAba(abaDesejada) {
 	// Pega todos os valores da coluna desejada
 	const telefones = abaDesejada.getRange(2, colTel, ultimaLinha, 1).getValues();
 
-	// Percorre toda a matriz
-	for (let i = 0; i < telefones.length; i++) {
-		const tel = telefones[i][0];
+  telefones.forEach((linha, i) => {
+    if (!linha[0]) return;
 
-		// Se o campo estiver vazio, passe para o próximo
-		if (!tel) continue;
-
-		// Formata os telefones
-		telefones[i][0] = FormatarTelefone(tel)
-	}
+    telefones[i][0] = String(linha[0])
+      .split("; ") // Divide os telefone separados por ;
+      .filter(tel => tel) // Remove valores vazios
+      .map(FormatarTelefone) // Formata cada telefone
+      .join("; "); // Une os telefones em uma string separados por ; novamente
+  });
 
 	abaDesejada.getRange(2, colTel, ultimaLinha, 1).setValues(telefones);
 }
