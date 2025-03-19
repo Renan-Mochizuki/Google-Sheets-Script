@@ -1,7 +1,21 @@
 const ui = SpreadsheetApp.getUi();
 // Função para adicionar o menu
 function onOpen(e) {
-  ui.createMenu('Menu de Funções').addItem('📂 Importar Dados', 'Importar').addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial').addItem('🗑️ Excluir todos os campos', 'LimparPlanilha').addSeparator().addSubMenu(ui.createMenu('Formatação da planilha').addItem('Formatar campos telefone', 'FormatarLinhasTelefone').addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao').addItem('Remover linhas vazias', 'RemoverLinhasVazias').addItem('Mostrar todas linhas', 'MostrarTodasLinhas').addItem('Esconder linhas', 'MostrarInterfaceEsconderLinhas')).addToUi();
+  ui.createMenu('Menu de Funções')
+    .addItem('📂 Importar Dados', 'Importar')
+    .addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
+    .addItem('🗑️ Excluir todos os campos', 'LimparPlanilha')
+    .addSeparator()
+    .addSubMenu(
+      ui
+        .createMenu('Formatação da planilha')
+        .addItem('Formatar campos telefone', 'FormatarLinhasTelefone')
+        .addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
+        .addItem('Remover linhas vazias', 'RemoverLinhasVazias')
+        .addItem('Mostrar todas linhas', 'MostrarTodasLinhas')
+        .addItem('Esconder linhas', 'MostrarInterfaceEsconderLinhas')
+    )
+    .addToUi();
 }
 
 // -- IMPORTANTE --
@@ -44,7 +58,11 @@ function RetornarLinhaDados(nomeProcurado, emailProcurado, telefoneProcurado, da
     const similaridadeTelefone = VerificarLinhaDados(telefoneDados, telefonesProcurados);
 
     // Se (email e telefone forem iguais) ou (email e nome forem iguais, tendo que o telefone não é caso especial) ou (telefone e nome forem iguais)
-    if ((similaridadeEmail >= 0.8 && similaridadeTelefone >= 0.8) || (similaridadeEmail >= 0.8 && similaridadeNome >= 0.5 && similaridadeTelefone !== -1) || (similaridadeTelefone >= 0.9 && similaridadeNome >= 0.6)) {
+    if (
+      (similaridadeEmail >= 0.8 && similaridadeTelefone >= 0.8) ||
+      (similaridadeEmail >= 0.8 && similaridadeNome >= 0.5 && similaridadeTelefone !== -1) ||
+      (similaridadeTelefone >= 0.9 && similaridadeNome >= 0.6)
+    ) {
       return i + 2; // Retorne o índice da array + 2 (Porque a array começa em 0 e a planilha em 2)
     }
   }
@@ -180,7 +198,19 @@ function ImportarDados(abaDesejada) {
 function ImportarDadosInteresse(valLinha, linhaAtual, linhaCampoGerencial, linhaVazia) {
   // Declarando uma array com os campos adicionais da planilha Interesse
   // *Considerando a ordem dos campos da planilha Gerencial (Ver ORDEM OBRIGATÓRIA DOS CAMPOS)
-  const intervaloInserir = [valLinha[colAnotacaoInteresse], null, valLinha[colNomeInteresse], valLinha[colEmailInteresse], valLinha[colTelInteresse], valLinha[colCidadeInteresse], valLinha[colEstadoInteresse], valLinha[colWhatsInteresse], 'SIM', valLinha[colRespondeuMarcoZeroInteresse], valLinha[colSituacaoInteresse]];
+  const intervaloInserir = [
+    valLinha[colAnotacaoInteresse],
+    null,
+    valLinha[colNomeInteresse],
+    valLinha[colEmailInteresse],
+    valLinha[colTelInteresse],
+    valLinha[colCidadeInteresse],
+    valLinha[colEstadoInteresse],
+    valLinha[colWhatsInteresse],
+    'SIM',
+    valLinha[colRespondeuMarcoZeroInteresse],
+    valLinha[colSituacaoInteresse],
+  ];
 
   // Se o registro ainda não estiver cadastrado na planilha gerencial
   if (!linhaCampoGerencial) {
@@ -429,13 +459,25 @@ function JuntarDados(dadosLinha1, dadosLinha2, primeiraColunaDoIntervalo) {
   const primeiraColuna = primeiraColunaDoIntervalo ?? colNomeGerencial;
 
   let dadosConcatenados = [];
-  const colunasDeSimNao = [colTerminouCursoGerencial, colWhatsGerencial, colRespondeuInteresseGerencial, colRespondeuMarcoZeroGerencial, colComentarioEnviadoMapaGerencial, colRespondeuMarcoFinalGerencial, colEnviouReflexaoMarcoFinalGerencial, colComentarioEnviadoMarcoFinalGerencial, colLinkTestadoCertificadoGerencial, colEntrouGrupoCertificadoGerencial];
+  const colunasDeSimNao = [
+    colTerminouCursoGerencial,
+    colWhatsGerencial,
+    colRespondeuInteresseGerencial,
+    colRespondeuMarcoZeroGerencial,
+    colComentarioEnviadoMapaGerencial,
+    colRespondeuMarcoFinalGerencial,
+    colEnviouReflexaoMarcoFinalGerencial,
+    colComentarioEnviadoMarcoFinalGerencial,
+    colLinkTestadoCertificadoGerencial,
+    colEntrouGrupoCertificadoGerencial,
+  ];
 
   for (let i = 0; i < dadosLinha1.length; i++) {
-    const colunaAtual = i + primeiraColuna;
+    const dado1 = dadosLinha1[i];
+    const dado2 = dadosLinha2[i];
+    const colunaAtual = primeiraColuna + i;
+
     let possuiSimilaridade = false;
-    let dado1 = dadosLinha1[i];
-    let dado2 = dadosLinha2[i];
 
     // Exceções especiais
     if (colunasDeSimNao.includes(colunaAtual)) {
@@ -449,7 +491,7 @@ function JuntarDados(dadosLinha1, dadosLinha2, primeiraColunaDoIntervalo) {
 
     // Se o dado1 não existir, adicione o dado2
     if (!dado1) {
-      dadosConcatenados.push(dado2);
+      dadosConcatenados.push(dado2 || '');
       continue;
     }
     if (dado2) {
@@ -506,4 +548,32 @@ function RetornarValorSimNao(valor1, valor2) {
   if (!valor2) return valor1;
   if (valor1 == 'SIM' || valor2 == 'SIM') return 'SIM';
   return valor1;
+}
+
+// Função que extrai a linha de uma url de redirect
+function ExtrairLinhaRedirect(url) {
+  const match = url.match(/(\d+)$/);
+  return match ? match[1] : null;
+}
+
+// Função que atualiza os dados das planilhas originais para salvar as alterações
+function FazerBackupOriginais() {
+  for (let i = 2; i < ultimaLinhaGerencial; i++) {
+    // Armazendo a linha inteira da planilha gerencial em uma array
+    // Definimos o primeiro item como null para facilitar o acesso aos índices (sem precisar ficar subtraindo 1)
+    const valLinha = [null, ...abaGerencial.getRange(i, 1, 1, ultimaColunaGerencial).getValues()[0]];
+
+    const urlRedirectInteresse = valLinha[colRedirectInteresseGerencial];
+    const urlRedirectMarcoZero = valLinha[colRedirectMarcoZeroGerencial];
+    const urlRedirectEnvioMapa = valLinha[colRedirectEnvioMapaGerencial];
+    const urlRedirectMarcoFinal = valLinha[colRedirectMarcoFinalGerencial];
+    const urlRedirectCertificado = valLinha[colRedirectCertificadoGerencial];
+
+    if (urlRedirectInteresse) {
+      const numLinhaOriginal = ExtrairLinhaRedirect(urlRedirectInteresse);
+      const intervaloInserir = [valLinha[colWhatsGerencial], valLinha[colRespondeuMarcoZeroGerencial], valLinha[colSituacaoGerencial]];
+      abaInteresse.getRange(numLinhaOriginal, colWhatsInteresse, 1, 3).setValues([intervaloInserir]);
+    }
+
+  }
 }
