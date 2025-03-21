@@ -147,34 +147,40 @@ const ultimaLinhaAnalisadaWhatsGerencial = 2;
 
 // -- Links das planilhas estão no arquivo Links
 
+let planilhaInteresse, planilhaMarcoZero, planilhaEnvioMapa, planilhaMarcoFinal, planilhaCertificado, planilhaGerencial;
+
 // Seleciona as planilhas e a aba
-const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
-const abaInteresse = planilhaInteresse.getSheets()[0];
-const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
-const abaMarcoZero = planilhaMarcoZero.getSheets()[0];
-const planilhaEnvioMapa = SpreadsheetApp.openByUrl(urlEnvioMapa);
-const abaEnvioMapa = planilhaEnvioMapa.getSheets()[0];
-const planilhaMarcoFinal = SpreadsheetApp.openByUrl(urlMarcoFinal);
-const abaMarcoFinal = planilhaMarcoFinal.getSheets()[0];
-const planilhaCertificado = SpreadsheetApp.openByUrl(urlCertificado);
-const abaCertificado = planilhaCertificado.getSheets()[0];
-const planilhaGerencial = SpreadsheetApp.openByUrl(urlGerencial);
-const abaGerencial = planilhaGerencial.getSheets()[0];
+// Usando try devido a erro a abrir a planilha (o trigger onOpen(e) automático não consegue executar openByUrl)
+try {
+  planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
+  planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
+  planilhaEnvioMapa = SpreadsheetApp.openByUrl(urlEnvioMapa);
+  planilhaMarcoFinal = SpreadsheetApp.openByUrl(urlMarcoFinal);
+  planilhaCertificado = SpreadsheetApp.openByUrl(urlCertificado);
+  planilhaGerencial = SpreadsheetApp.openByUrl(urlGerencial);
+} catch {}
+
+const abaInteresse = planilhaInteresse?.getSheets()[0];
+const abaMarcoZero = planilhaMarcoZero?.getSheets()[0];
+const abaEnvioMapa = planilhaEnvioMapa?.getSheets()[0];
+const abaMarcoFinal = planilhaMarcoFinal?.getSheets()[0];
+const abaCertificado = planilhaCertificado?.getSheets()[0];
+const abaGerencial = planilhaGerencial?.getSheets()[0];
 
 // Captura as últimas linhas e colunas
-const ultimaLinhaInteresse = abaInteresse.getLastRow();
-const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
-const ultimaLinhaEnvioMapa = abaEnvioMapa.getLastRow();
-const ultimaLinhaMarcoFinal = abaMarcoFinal.getLastRow();
-const ultimaLinhaCertificado = abaCertificado.getLastRow();
+const ultimaLinhaInteresse = abaInteresse?.getLastRow();
+const ultimaLinhaMarcoZero = abaMarcoZero?.getLastRow();
+const ultimaLinhaEnvioMapa = abaEnvioMapa?.getLastRow();
+const ultimaLinhaMarcoFinal = abaMarcoFinal?.getLastRow();
+const ultimaLinhaCertificado = abaCertificado?.getLastRow();
 // Apenas use essa variável uma vez a cada execução, pois ela não se atualiza sozinha
-const ultimaLinhaGerencial = abaGerencial.getLastRow();
-const ultimaColunaInteresse = abaInteresse.getLastColumn();
-const ultimaColunaMarcoZero = abaMarcoZero.getLastColumn();
-const ultimaColunaEnvioMapa = abaEnvioMapa.getLastColumn();
-const ultimaColunaMarcoFinal = abaMarcoFinal.getLastColumn();
-const ultimaColunaCertificado = abaCertificado.getLastColumn();
-const ultimaColunaGerencial = abaGerencial.getLastColumn();
+const ultimaLinhaGerencial = abaGerencial?.getLastRow();
+const ultimaColunaInteresse = abaInteresse?.getLastColumn();
+const ultimaColunaMarcoZero = abaMarcoZero?.getLastColumn();
+const ultimaColunaEnvioMapa = abaEnvioMapa?.getLastColumn();
+const ultimaColunaMarcoFinal = abaMarcoFinal?.getLastColumn();
+const ultimaColunaCertificado = abaCertificado?.getLastColumn();
+const ultimaColunaGerencial = abaGerencial?.getLastColumn();
 
 // Variável genérica da planilha ativa
 const planilhaAtiva = SpreadsheetApp.getActiveSpreadsheet();

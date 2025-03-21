@@ -3,7 +3,7 @@
 // Função para limpar toda a planilha
 function LimparPlanilha() {
   // Janela de diálogo de confirmação da ação
-  const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos? \n Os dados dessa planilha serão salvos nas planilhas originais', ui.ButtonSet.YES_NO);
+  const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos? \n Os dados modificaveis dessa planilha serão salvos nas planilhas originais', ui.ButtonSet.YES_NO);
 
   if (response == ui.Button.YES) {
     // Verifica se há mais de uma linha para limpar
@@ -133,13 +133,15 @@ function PreencherEstado() {
 
 // Função que exibe o HTML da interface com checkboxes para escolher quem quer esconder
 function MostrarInterfaceEsconderLinhas() {
-  const html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes').setWidth(400).setHeight(300);
+  const html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes').setWidth(405).setHeight(500);
   SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
 }
 
 // Função que recebe as escolhas feitas na interface e chama a função EsconderLinhas como necessário
 function ProcessarEscolhasEsconderLinhas(escolhas) {
-  EsconderLinhas(colTerminouCursoGerencial, 'SIM');
+  abaGerencial.getRange(2, 1).setValue(JSON.stringify(escolhas));
+  const esc = escolhas === 1 ? 'SIM' : 'NÃO';
+  // EsconderLinhas(colTerminouCursoGerencial, esc);
 }
 
 // Função que esconde todas as linhas que possuem um certo valor em uma coluna
@@ -150,7 +152,7 @@ function EsconderLinhas(colDesejada, valorAMostrar) {
   // Loop que percorre todos valores da coluna
   for (let i = 0; i < valColunas.length; i++) {
     // Se o valor da coluna for diferente do valorAMostrar, esconde a linha
-    if (valColunas[i] && valColunas[i] != valorAMostrar) {
+    if (valColunas[i] != valorAMostrar) {
       abaAtiva.hideRows(i + 2);
     }
   }

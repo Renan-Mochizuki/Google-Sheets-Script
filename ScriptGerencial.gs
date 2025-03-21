@@ -5,20 +5,19 @@ function onOpen(e) {
     .addItem('📂 Importar Dados', 'Importar')
     .addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
     .addItem('🗑️ Limpar Planilha', 'LimparPlanilha')
+    .addItem('Esconder linhas', 'MostrarInterfaceEsconderLinhas')
+    .addItem('teste', 'ProcessarEscolhasEsconderLinhas')
     .addSeparator()
     .addSubMenu(
       ui
         .createMenu('Formatação da planilha')
-        .addItem('Formatar campos telefone', 'FormatarLinhasTelefone')
+        .addItem('Formatar todos telefone', 'FormatarLinhasTelefone')
         .addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
         .addItem('Remover linhas vazias', 'RemoverLinhasVazias')
         .addItem('Mostrar todas linhas', 'MostrarTodasLinhas')
-        .addItem('Esconder linhas', 'MostrarInterfaceEsconderLinhas')
     )
     .addToUi();
 }
-
-onOpen();
 
 // -- IMPORTANTE --
 // VEJA OS COMENTÁRIOS DO ARQUIVO CONSTANTS
@@ -600,4 +599,5 @@ function FazerBackupOriginais() {
       abaCertificado.getRange(numLinhaCertificado, colLinkTestadoCertificado, 1, 2).setValues([intervaloInserir]);
     }
   }
+  planilhaAtiva.toast('Fim da execução','Backup concluído',tempoNotificacao);
 }
