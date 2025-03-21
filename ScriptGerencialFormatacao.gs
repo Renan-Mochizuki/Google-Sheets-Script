@@ -7,25 +7,25 @@ function LimparPlanilha() {
 
   if (response == ui.Button.YES) {
     // Verifica se há mais de uma linha para limpar
-    if (ultimaLinhaAtiva > 1) {
-      // Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
-      const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
+    if (ultimaLinhaAtiva <= 1) return;
 
-      // Limpa o conteúdo do intervalo selecionado
-      planilha.clearContent();
-      planilha.setBackground('#ffffff');
-      planilha.clearNote();
-    }
+    FazerBackupOriginais();
+
+    // Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
+    const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
+
+    // Limpa o conteúdo do intervalo selecionado
+    planilha.clearContent();
+    planilha.setBackground('#ffffff');
+    planilha.clearNote();
   }
 }
 
 // Função que completa campos vazios adicionais da planilha gerencial com NÃO
 function CompletarVaziosComNao() {
-  const colunas = [colWhatsGerencial, colRespondeuInteresseGerencial, colRespondeuMarcoZeroGerencial, colRespondeuMarcoFinalGerencial, colEnviouReflexaoMarcoFinalGerencial];
-
   // Loop das colunas
-  for (let j = 0; j < colunas.length; j++) {
-    const coluna = colunas[j];
+  for (let j = 0; j < colunasDeSimNao.length; j++) {
+    const coluna = colunasDeSimNao[j];
 
     // Loop das linhas
     for (let i = 2; i <= ultimaLinhaGerencial; i++) {
@@ -113,7 +113,6 @@ function RemoverLinhasVazias() {
   // Loop que percorre as linhas de baixo para cima
   for (let i = valColunas.length - 1; i >= 0; i--) {
     if (!valColunas[i]) {
-      // Verifica se a célula está vazia
       abaAtiva.deleteRow(i + 2); // Deleta a linha correspondente (i + 2 porque o índice começa em 0 e a planilha começa na linha 2)
     }
   }

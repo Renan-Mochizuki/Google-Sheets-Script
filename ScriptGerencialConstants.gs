@@ -118,6 +118,19 @@ const colRedirectEnvioMapaGerencial = Coluna('AA');
 const colRedirectMarcoFinalGerencial = Coluna('AB');
 const colRedirectCertificadoGerencial = Coluna('AC');
 
+const colunasDeSimNao = [
+  colTerminouCursoGerencial,
+  colWhatsGerencial,
+  colRespondeuInteresseGerencial,
+  colRespondeuMarcoZeroGerencial,
+  colComentarioEnviadoMapaGerencial,
+  colRespondeuMarcoFinalGerencial,
+  colEnviouReflexaoMarcoFinalGerencial,
+  colComentarioEnviadoMarcoFinalGerencial,
+  colLinkTestadoCertificadoGerencial,
+  colEntrouGrupoCertificadoGerencial,
+];
+
 // Outras variáveis
 const tempoNotificacao = 30;
 const corCampoSemDados = '#ababab';
