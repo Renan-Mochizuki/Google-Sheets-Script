@@ -13,7 +13,7 @@
         --thw: 21px;
       }
       body {
-        height: 490px;
+        height: 450px;
       }
       * {
         font-family: Arial, sans-serif;
@@ -53,7 +53,7 @@
         background-color: #a1a7a9;
       }
       #divEnviar input[type='button'] {
-        background-color: #455edd;
+        background-color: #5ab55a;
       }
       input[type='button']:hover {
         background-color: #a4dea7;
@@ -108,26 +108,32 @@
     </style>
 
     <script>
+      const ordem = ['whats','terminouCurso','linkTestadoCertificado','comentarioEnviadoMapa','comentarioEnviadoMarcoFinal'];
       let value;
       function enviarEscolhas() {
-        let escolhas = [];
+        let escolhas = {};
+        // Preencher a array escolhas
+        const toggleButtons = document.querySelectorAll('input[type="range"]');
+        let i = 0;
+        toggleButtons.forEach((tButton) => {
+          escolhas[ordem[i]] = RetornarSimNao(tButton.value);
+          i++;
+        });
         // Enviar escolhas para o código do Google Apps Script
         google.script.run
           .withSuccessHandler((response) => {
-            let i = 0;
-            // Preencher a array escolhas
-            const toggleButtons = document.querySelectorAll('input[type="range"]');
-            toggleButtons.forEach((tButton) => {
-              escolhas[i] = tButton.value
-              i++;
-            });
             // Fechar a interface
             google.script.host.close();
           })
           .withFailureHandler((error) => {
-            alert('Ocorreu erro. Sugestão: Tente abrir a planilha na guia anônima\n' + error.message);
+            alert('Tente abrir a planilha na guia anônima\n' + error.message);
           })
           .ProcessarEscolhasEsconderLinhas(escolhas);
+      }
+      function RetornarSimNao(valor){
+        if(valor == 3) return 'SIM';
+        if(valor == 1) return 'NÃO';
+        return null;
       }
       function desmarcarTudo() {
         const toggleButtons = document.querySelectorAll('input[type="range"]');

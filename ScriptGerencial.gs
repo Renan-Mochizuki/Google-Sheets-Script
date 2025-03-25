@@ -5,8 +5,7 @@ function onOpen(e) {
     .addItem('📂 Importar Dados', 'Importar')
     .addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
     .addItem('🗑️ Limpar Planilha', 'LimparPlanilha')
-    .addItem('Esconder linhas', 'MostrarInterfaceEsconderLinhas')
-    .addItem('teste', 'ProcessarEscolhasEsconderLinhas')
+    .addItem('🔎 Filtrar visualização', 'MostrarInterfaceEsconderLinhas')
     .addSeparator()
     .addSubMenu(
       ui
@@ -599,5 +598,5 @@ function FazerBackupOriginais() {
       abaCertificado.getRange(numLinhaCertificado, colLinkTestadoCertificado, 1, 2).setValues([intervaloInserir]);
     }
   }
-  planilhaAtiva.toast('Fim da execução','Backup concluído',tempoNotificacao);
+  planilhaAtiva.toast('Fim da execução', 'Backup concluído', tempoNotificacao);
 }

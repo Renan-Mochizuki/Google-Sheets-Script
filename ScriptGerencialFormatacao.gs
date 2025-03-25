@@ -133,30 +133,39 @@ function PreencherEstado() {
 
 // Função que exibe o HTML da interface com checkboxes para escolher quem quer esconder
 function MostrarInterfaceEsconderLinhas() {
-  const html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes').setWidth(405).setHeight(500);
+  const html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes').setWidth(400).setHeight(450);
   SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
 }
 
 // Função que recebe as escolhas feitas na interface e chama a função EsconderLinhas como necessário
 function ProcessarEscolhasEsconderLinhas(escolhas) {
-  abaGerencial.getRange(2, 1).setValue(JSON.stringify(escolhas));
-  const esc = escolhas === 1 ? 'SIM' : 'NÃO';
-  // EsconderLinhas(colTerminouCursoGerencial, esc);
-}
+  MostrarTodasLinhas();
 
-// Função que esconde todas as linhas que possuem um certo valor em uma coluna
-function EsconderLinhas(colDesejada, valorAMostrar) {
   // Pega todos os valores da coluna desejada
-  const valColunas = abaAtiva.getRange(2, colDesejada, ultimaLinhaAtiva, 1).getValues().flat();
+  const valWhats = escolhas.whats ? abaGerencial.getRange(2, colWhatsGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null;
+  const valTerminouCurso = escolhas.terminouCurso ? abaGerencial.getRange(2, colTerminouCursoGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null;
+  const valLinkTestado = escolhas.linkTestadoCertificado ? abaGerencial.getRange(2, colLinkTestadoCertificadoGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null;
+  const valComentarioEnviadoMapa = escolhas.comentarioEnviadoMapa ? abaGerencial.getRange(2, colComentarioEnviadoMapaGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null;
+  const valComentarioEnviadoMarcoFinal = escolhas.comentarioEnviadoMarcoFinal ? abaGerencial.getRange(2, colComentarioEnviadoMarcoFinalGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null;
 
   // Loop que percorre todos valores da coluna
-  for (let i = 0; i < valColunas.length; i++) {
-    // Se o valor da coluna for diferente do valorAMostrar, esconde a linha
-    if (valColunas[i] != valorAMostrar) {
-      abaAtiva.hideRows(i + 2);
+  for (let i = 0; i < ultimaLinhaGerencial; i++) {
+    if(escolhas.whats){
+      if(escolhas.whats == 'SIM'){
+        if(valWhats[i] != 'SIM'){
+          abaGerencial.hideRows(i + 2);
+        }
+      } else {
+        if(valWhats[i] == 'SIM'){
+          abaGerencial.hideRows(i + 2);
+        }
+      }
     }
   }
 }
+
+// Função que esconde todas as linhas que possuem um certo valor em uma coluna
+function EsconderLinhas(colDesejada, valorAMostrar) {}
 
 // Função que revela todas as linhas escondidas
 function MostrarTodasLinhas() {
