@@ -5,7 +5,7 @@ function onOpen(e) {
     .addItem('📂 Importar Dados', 'Importar')
     .addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
     .addItem('🗑️ Limpar Planilha', 'LimparPlanilha')
-    .addItem('💾 SalvarDados', 'FazerBackupOriginais')
+    .addItem('💾 Salvar Dados', 'FazerBackupOriginais')
     .addItem('👁‍🗨 Mostrar todas linhas', 'MostrarTodasLinhas')
     .addItem('🔎 Filtrar visualização', 'MostrarInterfaceEsconderLinhas')
     .addSeparator()
@@ -365,7 +365,7 @@ function LidarComPessoaNaoCadastrada(valLinha, linhaAtual, linhaVazia, abaDeseja
   const { colNome, colEmail, colTel, ImportarDadosPlanilha } = objetoMap.get(abaDesejada);
 
   // Declarando o intervalo considerando a ordem dos campos da planilha Gerencial (Ver ORDEM OBRIGATÓRIA DOS CAMPOS)
-  const intervaloInserir = ['Não cadastrada nas outras planilhas', null, valLinha[colNome], valLinha[colEmail], valLinha[colTel]];
+  const intervaloInserir = ['Não cadastrada na Interesse nem Marco zero', null, valLinha[colNome], valLinha[colEmail], valLinha[colTel]];
 
   abaGerencial.getRange(linhaVazia, colAnotacaoGerencial, 1, 5).setValues([intervaloInserir]);
 
@@ -582,9 +582,10 @@ function FazerBackupOriginais() {
     const valLinha = abaGerencial.getRange(i, 1, 1, ultimaColunaGerencial).getValues()[0];
     valLinha.unshift(null);
 
-    if (!ValidarLoop(valLinha[colNome], valLinha[colEmail], valLinha[colTel])) continue;
+    if (!ValidarLoop(valLinha[colNomeGerencial], valLinha[colEmailGerencial], valLinha[colTelGerencial])) continue;
 
-    if (i % 100 === 0) planilhaAtiva.toast('Processo na linha ' + i + ' da planilha gerencial', Math.round((i / ultimaLinhaGerencial) * 100) + '% concluído da função atual', tempoNotificacao);
+    if (i % 100 === 0)
+      planilhaAtiva.toast('Processo na linha ' + i + ' em salvar dados da planilha Gerencial', Math.round((i / ultimaLinhaGerencial) * 100) + '% concluído da função atual', tempoNotificacao);
 
     const numLinhaInteresse = ExtrairLinhaRedirect(valLinha[colRedirectInteresseGerencial]);
     const numLinhaMarcoZero = ExtrairLinhaRedirect(valLinha[colRedirectMarcoZeroGerencial]);
