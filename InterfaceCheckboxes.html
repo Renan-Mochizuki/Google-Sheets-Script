@@ -7,11 +7,6 @@
     <title>Interface de seleção de linhas</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-      :root {
-        --tkh: 25px;
-        --thh: 21px;
-        --thw: 21px;
-      }
       body {
         height: 450px;
       }
@@ -20,16 +15,65 @@
         margin: 0;
         padding: 0;
       }
-      h4 {
-        text-align: center;
-        margin-bottom: 5px;
-      }
       form {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
         height: 100%;
+      }
+      .wrapper {
+        width: 100%;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        column-gap: 10px;
+        margin-bottom: 10px;
+        margin-top: 5px;
+      }
+      #custom-toggle {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 25px;
+        width: 300px;
+        background-color: #333;
+        border-radius: 25px;
+        padding: 0 2px;
+        margin: 0;
+        cursor: pointer;
+      }
+      #custom-toggle.tgl-def::-webkit-slider-thumb {
+        background-color: orange;
+        transition: background-color 0.25s ease-in-out, position 0.25s ease-in-out;
+      }
+      #custom-toggle.tgl-on::-webkit-slider-thumb {
+        background-color: green;
+        transition: background-color 0.25s ease-in-out, position 0.25s ease-in-out;
+      }
+      #custom-toggle.tgl-off::-webkit-slider-thumb {
+        background-color: red;
+        transition: background-color 0.25s ease-in-out, position 0.25s ease-in-out;
+      }
+      #custom-toggle::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 21px;
+        height: 21px;
+        border-radius: 25px;
+      }
+      #custom-toggle:focus {
+        outline: none;
+      }
+      input[type='button'], input[type='submit'] {
+        cursor: pointer;
+      }
+      h4 {
+        text-align: center;
+      }
+      #aviso {
+        text-align: center;
+        font-size: 12px;
       }
       .botoesBorda {
         width: 100%;
@@ -40,83 +84,73 @@
         padding: 10px;
         box-sizing: border-box;
       }
-      .botoesBorda input[type='button'] {
+      .botoesBorda input[type='button'], .botoesBorda input[type='submit'] {
         font-size: 16px;
         color: white;
         border: none;
         border-radius: 10px;
-        cursor: pointer;
         padding: 10px 24px;
         flex: 1;
       }
-      #divBotoesSelecionarTudo input[type='button'] {
+      #botaoDesmarcarTudo {
         background-color: #a1a7a9;
       }
-      #divEnviar input[type='button'] {
+      #botaoDesmarcarTudo:hover {
+        background-color: #c4ccce;
+      }
+      #botaoEnviar {
         background-color: #5ab55a;
       }
-      input[type='button']:hover {
+      #botaoEnviar:hover {
         background-color: #a4dea7;
       }
-      .wrapper {
-        width: 100%;
-        height: 30px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        column-gap: 10px;
-        margin-bottom: 10px;
+      .subtitle {
+        font-size: 12px;
+        color: #333;
+        text-align: center;
       }
-      #custom-toggle {
-        -webkit-appearance: none;
-        appearance: none;
-        height: var(--tkh);
-        width: 300px;
-        background-color: #333;
-        border-radius: 25px;
-        padding: 0 2px;
-        margin: 0;
-        cursor: pointer;
+      #turma input[type='button'] {
+        border-radius: 10px;
+        padding: 5px;
+        border: none;
       }
-      /* Default state */
-      #custom-toggle.tgl-def::-webkit-slider-thumb {
-        background-color: orange;
-        transition: background-color 0.25s ease-in-out, position 0.25s ease-in-out;
+      #botaoEspera {
+        background-color: #e6cff2;
       }
-      /* Toggle on */
-      #custom-toggle.tgl-on::-webkit-slider-thumb {
-        background-color: green;
-        transition: background-color 0.25s ease-in-out, position 0.25s ease-in-out;
+      #botaoEspera:hover {
+        background-color: #f4e1ff;
       }
-      /* Toggle off */
-      #custom-toggle.tgl-off::-webkit-slider-thumb {
-        background-color: red;
-        transition: background-color 0.25s ease-in-out, position 0.25s ease-in-out;
+      #botaoVazio {
+        background-color: #f2f2f2;
       }
-      /* Thumb style */
-      #custom-toggle::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: var(--thw);
-        height: var(--thh);
-        border-radius: 25px;
+      #botaoVazio:hover {
+        background-color: #fffefe;
       }
-      /* Focus outline */
-      #custom-toggle:focus {
-        outline: none;
+      #botaoDesmarcarTurma {
+        background-color: #a1a7a9;
+        color: white;
+      }
+      #botaoDesmarcarTurma:hover {
+        background-color: #c4ccce;
+      }
+      #campoTurma {
+        padding: 5px;
+        flex: 1;
+        border-radius: 10px;
+        text-align: center;
       }
     </style>
 
     <script>
-      const ordem = ['whats','terminouCurso','linkTestadoCertificado','comentarioEnviadoMapa','comentarioEnviadoMarcoFinal'];
+      const ordemRadios = ['whats', 'terminouCurso', 'linkTestadoCertificado', 'comentarioEnviadoMapa', 'comentarioEnviadoMarcoFinal'];
       let value;
       function enviarEscolhas() {
         let escolhas = {};
-        // Preencher a array escolhas
         const toggleButtons = document.querySelectorAll('input[type="range"]');
+        escolhas['situacao'] = document.getElementById('campoTurma').value;
         let i = 0;
         toggleButtons.forEach((tButton) => {
-          escolhas[ordem[i]] = RetornarSimNao(tButton.value);
+          escolhas[ordemRadios[i]] = RetornarSimNao(tButton.value);
           i++;
         });
         // Enviar escolhas para o código do Google Apps Script
@@ -126,21 +160,25 @@
             google.script.host.close();
           })
           .withFailureHandler((error) => {
+            // Erro
             alert('Tente abrir a planilha na guia anônima\n' + error.message);
           })
           .ProcessarEscolhasEsconderLinhas(escolhas);
       }
-      function RetornarSimNao(valor){
-        if(valor == 3) return 'SIM';
-        if(valor == 1) return 'NÃO';
+
+      function RetornarSimNao(valor) {
+        if (valor == 3) return 'SIM';
+        if (valor == 1) return 'NÃO';
         return null;
       }
+
       function desmarcarTudo() {
         const toggleButtons = document.querySelectorAll('input[type="range"]');
         toggleButtons.forEach((tButton) => {
           tButton.value = 2;
           filterme(2, tButton);
         });
+        desmarcarTurma();
       }
 
       function filterme(newValue, element) {
@@ -149,16 +187,25 @@
           .removeClass('tgl-off tgl-def tgl-on')
           .addClass(value === 1 ? 'tgl-off' : value === 2 ? 'tgl-def' : 'tgl-on');
       }
+
+      function desmarcarTurma() {
+        var input = document.getElementById('campoTurma');
+        input.value = '';
+      }
     </script>
   </head>
 
   <body>
-    <form id="opcoesForm">
-      <div id="divBotoesSelecionarTudo" class="botoesBorda">
-        <input type="button" value="Desmarcar tudo" onclick="desmarcarTudo()" />
-      </div>
-
+    <form id="opcoesForm" action="#" method="post">
       <div id="botoesSelecionar">
+        <h4>Qual turma/situação?</h4>
+        <div class="wrapper" id="turma">
+          <input type="button" id="botaoEspera" value="ESPERA" onclick="document.getElementById('campoTurma').value = 'ESPERA'" />
+          <input type="text" id="campoTurma" name="turma" placeholder="Digite a turma" value="" />
+          <input type="button" id="botaoVazio" value="VAZIO" onclick="document.getElementById('campoTurma').value = 'VAZIO'" />
+          <!-- <input type="button" id="botaoDesmarcarTurma" value="Desmarcar" onclick="desmarcarTurma()" /> -->
+        </div>
+
         <h4>Cadastrado no WhatsApp?</h4>
         <div class="wrapper">
           <span>Não</span>
@@ -174,29 +221,33 @@
         </div>
 
         <h4>Link do certificado testado?</h4>
+        <p class="subtitle">Apenas para quem enviou o certificado</p>
         <div class="wrapper">
           <span>Não</span>
           <input type="range" name="points" onchange="filterme(this.value, this);" min="1" step="1" id="custom-toggle" class="tgl-def" max="3" value="2" />
           <span>Sim</span>
         </div>
 
-        <h4>Comentarios do mapa enviado?</h4>
+        <h4>Comentários do mapa enviado?</h4>
+        <p class="subtitle">Apenas para quem enviou o mapa</p>
         <div class="wrapper">
           <span>Não</span>
           <input type="range" name="points" onchange="filterme(this.value, this);" min="1" step="1" id="custom-toggle" class="tgl-def" max="3" value="2" />
           <span>Sim</span>
         </div>
 
-        <h4>Comentarios do marco final enviado?</h4>
+        <h4>Comentários do marco final enviado?</h4>
+        <p class="subtitle">Apenas para quem enviou o marco final</p>
         <div class="wrapper">
           <span>Não</span>
           <input type="range" name="points" onchange="filterme(this.value, this);" min="1" step="1" id="custom-toggle" class="tgl-def" max="3" value="2" />
           <span>Sim</span>
         </div>
       </div>
-
-      <div id="divEnviar" class="botoesBorda">
-        <input type="button" value="Enviar" onclick="enviarEscolhas()" />
+      <p id="aviso">Campos desmarcados não serão considerados</p>
+      <div id="divBotoesSelecionarTudo" class="botoesBorda">
+        <input id="botaoDesmarcarTudo" type="button" value="Desmarcar tudo" onclick="desmarcarTudo()" />
+        <input id="botaoEnviar" type="submit" value="Enviar" onclick="enviarEscolhas()" />
       </div>
     </form>
   </body>

@@ -5,6 +5,7 @@ function onOpen(e) {
     .addItem('📂 Importar Dados', 'Importar')
     .addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
     .addItem('🗑️ Limpar Planilha', 'LimparPlanilha')
+    .addItem('👁‍🗨 Mostrar todas linhas', 'MostrarTodasLinhas')
     .addItem('🔎 Filtrar visualização', 'MostrarInterfaceEsconderLinhas')
     .addSeparator()
     .addSubMenu(
@@ -13,7 +14,6 @@ function onOpen(e) {
         .addItem('Formatar todos telefone', 'FormatarLinhasTelefone')
         .addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
         .addItem('Remover linhas vazias', 'RemoverLinhasVazias')
-        .addItem('Mostrar todas linhas', 'MostrarTodasLinhas')
     )
     .addToUi();
 }
