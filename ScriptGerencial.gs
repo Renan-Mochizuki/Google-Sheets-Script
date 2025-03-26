@@ -12,7 +12,9 @@ function onOpen(e) {
       ui
         .createMenu('Formatação da planilha')
         .addItem('Formatar todos telefone', 'FormatarLinhasTelefone')
+        .addItem('Preencher campos estado', 'PreencherEstado')
         .addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
+        .addItem('Apagar todos os dados', 'ApagarTodosDados')
         .addItem('Remover linhas vazias', 'RemoverLinhasVazias')
     )
     .addToUi();
@@ -36,8 +38,9 @@ function ValidarLoop(...args) {
   const nomeValido = args[0] && (typeof args[0] === 'string' ? !args[0].toLowerCase().includes('teste') : true);
   const emailValido = args[1] && (typeof args[1] === 'string' ? !args[1].toLowerCase().includes('teste') : true);
   const telefoneValido = args[2] && (typeof args[2] === 'string' ? !args[2].toLowerCase().includes('teste') : true);
-
-  if (!nomeValido && !emailValido && !telefoneValido) return false;
+  
+  // Retorna falso se qualquer um dos campos for inválido
+  if (!nomeValido || !emailValido || !telefoneValido) return false;
 
   // Se outro parametro foi passado, verifique se qualquer um for nulo, retorne falso
   for (let i = 3; i < args.length; i++) {
@@ -481,7 +484,7 @@ function JuntarDados(dadosLinha1, dadosLinha2, primeiraColunaDoIntervalo) {
       dadosConcatenados.push(RetornarValorSimNao(dado1, dado2));
       continue;
     }
-    if (colunaAtual == colSituacaoGerencial) {
+    if (colunaAtual === colSituacaoGerencial) {
       dadosConcatenados.push(RetornarTurmaMaisRecente(dado1, dado2));
       continue;
     }
@@ -505,6 +508,12 @@ function JuntarDados(dadosLinha1, dadosLinha2, primeiraColunaDoIntervalo) {
 
       // Caso não o texto do dado1 não possua similaridade com o dado2, adicione o dado2
       if (!possuiSimilaridade) {
+        // Caso especial para o estado
+        if(colunaAtual === colEstadoGerencial){
+          dadosConcatenados.push(dado2.toString().trim());
+          continue;
+        }
+
         dadosConcatenados.push(dado1.toString().trim() + '; ' + dado2.toString().trim());
         continue;
       }
@@ -555,7 +564,11 @@ function ExtrairLinhaRedirect(url) {
 
 // Função que formata uma array de strings, deixando apenas a primeira letra em caixa alta
 function FormatarCaixaBaixa(array) {
-  return array.map((str) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase());
+  if (!Array.isArray(array)) return [];
+  return array.map((str) => {
+    if (typeof str !== 'string' || !str.trim()) return '';
+    return str.trim().charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  });
 }
 
 // Função que atualiza os dados das planilhas originais para salvar as alterações

@@ -1,9 +1,9 @@
 // -- Funções de formatação da planilha --
 
-// Função para limpar toda a planilha
+// Função para limpar toda a planilha fazendo backup
 function LimparPlanilha() {
   // Janela de diálogo de confirmação da ação
-  const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos? \n Os dados modificaveis dessa planilha serão salvos nas planilhas originais', ui.ButtonSet.YES_NO);
+  const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os campos? \n Os dados modificáveis dessa planilha serão salvos nas planilhas originais', ui.ButtonSet.YES_NO);
 
   if (response == ui.Button.YES) {
     // Verifica se há mais de uma linha para limpar
@@ -19,6 +19,25 @@ function LimparPlanilha() {
     planilha.setBackground('#ffffff');
     planilha.clearNote();
   }
+}
+
+// Função que apaga toda a planilha sem realizar backup
+function ApagarTodosDados(){
+    // Janela de diálogo de confirmação da ação
+    const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os dados? \n Todos os dados dessa planilha serão apagados e não serão salvos', ui.ButtonSet.YES_NO);
+
+    if (response == ui.Button.YES) {
+      // Verifica se há mais de uma linha para limpar
+      if (ultimaLinhaAtiva <= 1) return;
+
+      // Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
+      const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
+  
+      // Limpa o conteúdo do intervalo selecionado
+      planilha.clearContent();
+      planilha.setBackground('#ffffff');
+      planilha.clearNote();
+    }
 }
 
 // Função que completa campos vazios adicionais da planilha gerencial com NÃO
@@ -121,14 +140,38 @@ function RemoverLinhasVazias() {
 // Função para preencher o campo do estado a partir do campo cidade
 function PreencherEstado() {
   // Atribui os variáveis de acordo com a abaAtiva
-  const { colCidade, colEstado } = objetoMap.get(abaAtiva);
-  Logger.log(colCidade, colEstado);
-  // Loop das linhas
-  for (let i = 2; i <= ultimaLinhaAtiva; i++) {
-    const cidade = abaAtiva.getRange(i, colCidade).getValue();
+  const { colCidade } = objetoMap.get(abaAtiva);
+  const cidadesEstados = abaAtiva.getRange(2, colCidade, ultimaLinhaAtiva, 2).getValues();
 
-    abaAtiva.getRange(i, colEstado).setValue(estado);
+  // Loop das linhas
+  for (let i = 0; i < cidadesEstados.length; i++) {
+    const cidade = cidadesEstados[i][0];
+    const estado = cidadesEstados[i][1];
+
+    // Se a cidade estiver vazia, ou o estado já tiver preenchido
+    if (!cidade || estado || typeof cidade !== 'string') continue;
+
+    estados.forEach((estadoCompleto) => {
+      const partes = estadoCompleto.split(' - ');
+      for(let cidadeSeparada of cidade.split(';')){
+        if (cidadeSeparada.trim() === partes[0] || ContemUF(cidadeSeparada, partes[1])) {
+          cidadesEstados[i][1] = estadoCompleto;
+        }
+      }
+    });
   }
+  
+  abaAtiva.getRange(2, colCidade, ultimaLinhaAtiva, 2).setValues(cidadesEstados);
+}
+
+// Função que verifica se uma string contém uma UF
+function ContemUF(str, uf) {
+  if (typeof str !== 'string' || typeof uf !== 'string') return false;
+
+  // Regex para verificar a UF isolada, permitindo espaços, barras, traços, etc.
+  const regex = new RegExp(`(^|[\\s\\/\\-])${uf}($|[\\s\\/\\-])`, 'i');
+
+  return regex.test(str);
 }
 
 // Função que exibe o HTML da interface com checkboxes para escolher quem quer esconder
@@ -171,7 +214,7 @@ function ProcessarEscolhasEsconderLinhas(escolhas) {
     if (escolhas.linkTestadoCertificado && (valores.linkCertificado[i] ? VerificarEsconder(escolhas.linkTestadoCertificado, valores.linkTestadoCertificado[i]) : true)) {
       esconderLinha = true;
     }
-    if (escolhas.comentarioEnviadoMapa && (valores.linkMapa[i] ? VerificarEsconder(escolhas.comentarioEnviadoMapa, valores.comentarioEnviadoMapa[i])  : true)) {
+    if (escolhas.comentarioEnviadoMapa && (valores.linkMapa[i] ? VerificarEsconder(escolhas.comentarioEnviadoMapa, valores.comentarioEnviadoMapa[i]) : true)) {
       esconderLinha = true;
     }
     if (escolhas.comentarioEnviadoMarcoFinal && (valores.respondeuMarcoFinal[i] ? VerificarEsconder(escolhas.comentarioEnviadoMarcoFinal, valores.comentarioEnviadoMarcoFinal[i]) : true)) {
@@ -193,7 +236,7 @@ function VerificarEsconder(escolha, valor) {
 // Função que verifica se a linha da situação deve ser escondida ou não
 function VerificarEsconderSituacao(escolha, valor) {
   if (!escolha) return false;
-  return !((escolha === 'VAZIO' && !valor) || (escolha === valor));
+  return !((escolha === 'VAZIO' && !valor) || escolha === valor);
 }
 
 // Função que revela todas as linhas escondidas

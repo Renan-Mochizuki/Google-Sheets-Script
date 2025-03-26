@@ -112,11 +112,11 @@ const colDataCertificadoGerencial = Coluna('U');
 const colLinkCertificadoGerencial = Coluna('V');
 const colLinkTestadoCertificadoGerencial = Coluna('W');
 const colEntrouGrupoCertificadoGerencial = Coluna('X');
-const colRedirectInteresseGerencial = Coluna('Y');
-const colRedirectMarcoZeroGerencial = Coluna('Z');
-const colRedirectEnvioMapaGerencial = Coluna('AA');
-const colRedirectMarcoFinalGerencial = Coluna('AB');
-const colRedirectCertificadoGerencial = Coluna('AC');
+const colRedirectInteresseGerencial = Coluna('AA');
+const colRedirectMarcoZeroGerencial = Coluna('AB');
+const colRedirectEnvioMapaGerencial = Coluna('AC');
+const colRedirectMarcoFinalGerencial = Coluna('AD');
+const colRedirectCertificadoGerencial = Coluna('AE');
 
 const colunasDeSimNao = [
   colTerminouCursoGerencial,
@@ -190,6 +190,8 @@ const ultimaColunaAtiva = abaAtiva.getLastColumn();
 const colNomeAtiva = colNomeGeral;
 const colEmailAtiva = colEmailGeral;
 const colTelAtiva = colTelGeral;
+const colCidadeAtiva = colCidadeGerencial;
+const colEstadoAtiva = colEstadoGerencial;
 
 // Objeto que permite generalizar o código, passando a aba para o objeto, assim extraindo as variáveis respectivas da aba
 const objetoMap = new Map([
@@ -288,6 +290,8 @@ const objetoMap = new Map([
       colNome: colNomeAtiva,
       colEmail: colEmailAtiva,
       colTel: colTelAtiva,
+      colCidade: colCidadeAtiva,
+      colEstado: colEstadoAtiva,
     },
   ],
 ]);
@@ -376,5 +380,4 @@ const estados = [
   'São Paulo - SP',
   'Sergipe - SE',
   'Tocantins - TO',
-  'Internacional',
 ];
