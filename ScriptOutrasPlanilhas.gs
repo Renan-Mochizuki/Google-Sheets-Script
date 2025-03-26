@@ -1,4 +1,3 @@
-
 // Função que sincronizará quem entrou no whatsapp entre as três planilhas
 function SincronizarWhatsGerencial() {
   // Sincronize as planilhas Interesse e Marco Zero, depois as planilhas Interesse e Gerencial e por fim, Interesse e Marco Zero de novo
@@ -29,8 +28,7 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
     const email = nomesEmailsTelefones1[i][1];
     const telefone = nomesEmailsTelefones1[i][2];
 
-    // Se não existir email, ou for o "teste" passe para o próximo
-    if (!email || email.toLowerCase().includes('teste')) continue;
+    if (!ValidarLoop(nome, email, telefone)) continue;
 
     // Pegue a linha do campo na planilha desejada 2
     const linhaCampoDesejada2 = RetornarLinhaDados(nome, email, telefone, nomesEmailsTelefones2);
@@ -60,8 +58,7 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
     const email = nomesEmailsTelefones2[i][1];
     const telefone = nomesEmailsTelefones2[i][2];
 
-    // Se não existir email, ou for o "teste" passe para o próximo
-    if (!email || email.toLowerCase().includes('teste')) continue;
+    if (!ValidarLoop(nome, email, telefone)) continue;
 
     // Pegue a linha do campo na planilha desejada 1
     const linhaCampoDesejada1 = RetornarLinhaDados(nome, email, telefone, nomesEmailsTelefones1);
@@ -105,8 +102,7 @@ function VerificarEMarcarCadastroOutraPlanilha(abaParaRegistro, colParaRegistro,
     const email = nomesEmailsTelefonesRegistro[i][1];
     const telefone = nomesEmailsTelefonesRegistro[i][2];
 
-    // Se não existir email, ou for o "teste" passe para o próximo
-    if (!email || email.toLowerCase().includes('teste')) continue;
+    if (!ValidarLoop(nome, email, telefone)) continue;
 
     // Toast da mensagem do progresso de execução da função
     if (i % 300 === 0) {

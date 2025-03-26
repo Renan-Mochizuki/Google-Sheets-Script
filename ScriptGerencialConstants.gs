@@ -112,11 +112,24 @@ const colDataCertificadoGerencial = Coluna('U');
 const colLinkCertificadoGerencial = Coluna('V');
 const colLinkTestadoCertificadoGerencial = Coluna('W');
 const colEntrouGrupoCertificadoGerencial = Coluna('X');
-const colRedirectInteresseGerencial = Coluna('Y');
-const colRedirectMarcoZeroGerencial = Coluna('Z');
-const colRedirectEnvioMapaGerencial = Coluna('AA');
-const colRedirectMarcoFinalGerencial = Coluna('AB');
-const colRedirectCertificadoGerencial = Coluna('AC');
+const colRedirectInteresseGerencial = Coluna('AA');
+const colRedirectMarcoZeroGerencial = Coluna('AB');
+const colRedirectEnvioMapaGerencial = Coluna('AC');
+const colRedirectMarcoFinalGerencial = Coluna('AD');
+const colRedirectCertificadoGerencial = Coluna('AE');
+
+const colunasDeSimNao = [
+  colTerminouCursoGerencial,
+  colWhatsGerencial,
+  colRespondeuInteresseGerencial,
+  colRespondeuMarcoZeroGerencial,
+  colComentarioEnviadoMapaGerencial,
+  colRespondeuMarcoFinalGerencial,
+  colEnviouReflexaoMarcoFinalGerencial,
+  colComentarioEnviadoMarcoFinalGerencial,
+  colLinkTestadoCertificadoGerencial,
+  colEntrouGrupoCertificadoGerencial,
+];
 
 // Outras variáveis
 const tempoNotificacao = 30;
@@ -134,34 +147,40 @@ const ultimaLinhaAnalisadaWhatsGerencial = 2;
 
 // -- Links das planilhas estão no arquivo Links
 
+let planilhaInteresse, planilhaMarcoZero, planilhaEnvioMapa, planilhaMarcoFinal, planilhaCertificado, planilhaGerencial;
+
 // Seleciona as planilhas e a aba
-const planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
-const abaInteresse = planilhaInteresse.getSheets()[0];
-const planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
-const abaMarcoZero = planilhaMarcoZero.getSheets()[0];
-const planilhaEnvioMapa = SpreadsheetApp.openByUrl(urlEnvioMapa);
-const abaEnvioMapa = planilhaEnvioMapa.getSheets()[0];
-const planilhaMarcoFinal = SpreadsheetApp.openByUrl(urlMarcoFinal);
-const abaMarcoFinal = planilhaMarcoFinal.getSheets()[0];
-const planilhaCertificado = SpreadsheetApp.openByUrl(urlCertificado);
-const abaCertificado = planilhaCertificado.getSheets()[0];
-const planilhaGerencial = SpreadsheetApp.openByUrl(urlGerencial);
-const abaGerencial = planilhaGerencial.getSheets()[0];
+// Usando try devido a erro a abrir a planilha (o trigger onOpen(e) automático não consegue executar openByUrl)
+try {
+  planilhaInteresse = SpreadsheetApp.openByUrl(urlInteresse);
+  planilhaMarcoZero = SpreadsheetApp.openByUrl(urlMarcoZero);
+  planilhaEnvioMapa = SpreadsheetApp.openByUrl(urlEnvioMapa);
+  planilhaMarcoFinal = SpreadsheetApp.openByUrl(urlMarcoFinal);
+  planilhaCertificado = SpreadsheetApp.openByUrl(urlCertificado);
+  planilhaGerencial = SpreadsheetApp.openByUrl(urlGerencial);
+} catch {}
+
+const abaInteresse = planilhaInteresse?.getSheets()[0];
+const abaMarcoZero = planilhaMarcoZero?.getSheets()[0];
+const abaEnvioMapa = planilhaEnvioMapa?.getSheets()[0];
+const abaMarcoFinal = planilhaMarcoFinal?.getSheets()[0];
+const abaCertificado = planilhaCertificado?.getSheets()[0];
+const abaGerencial = planilhaGerencial?.getSheets()[0];
 
 // Captura as últimas linhas e colunas
-const ultimaLinhaInteresse = abaInteresse.getLastRow();
-const ultimaLinhaMarcoZero = abaMarcoZero.getLastRow();
-const ultimaLinhaEnvioMapa = abaEnvioMapa.getLastRow();
-const ultimaLinhaMarcoFinal = abaMarcoFinal.getLastRow();
-const ultimaLinhaCertificado = abaCertificado.getLastRow();
+const ultimaLinhaInteresse = abaInteresse?.getLastRow();
+const ultimaLinhaMarcoZero = abaMarcoZero?.getLastRow();
+const ultimaLinhaEnvioMapa = abaEnvioMapa?.getLastRow();
+const ultimaLinhaMarcoFinal = abaMarcoFinal?.getLastRow();
+const ultimaLinhaCertificado = abaCertificado?.getLastRow();
 // Apenas use essa variável uma vez a cada execução, pois ela não se atualiza sozinha
-const ultimaLinhaGerencial = abaGerencial.getLastRow();
-const ultimaColunaInteresse = abaInteresse.getLastColumn();
-const ultimaColunaMarcoZero = abaMarcoZero.getLastColumn();
-const ultimaColunaEnvioMapa = abaEnvioMapa.getLastColumn();
-const ultimaColunaMarcoFinal = abaMarcoFinal.getLastColumn();
-const ultimaColunaCertificado = abaCertificado.getLastColumn();
-const ultimaColunaGerencial = abaGerencial.getLastColumn();
+const ultimaLinhaGerencial = abaGerencial?.getLastRow();
+const ultimaColunaInteresse = abaInteresse?.getLastColumn();
+const ultimaColunaMarcoZero = abaMarcoZero?.getLastColumn();
+const ultimaColunaEnvioMapa = abaEnvioMapa?.getLastColumn();
+const ultimaColunaMarcoFinal = abaMarcoFinal?.getLastColumn();
+const ultimaColunaCertificado = abaCertificado?.getLastColumn();
+const ultimaColunaGerencial = abaGerencial?.getLastColumn();
 
 // Variável genérica da planilha ativa
 const planilhaAtiva = SpreadsheetApp.getActiveSpreadsheet();
@@ -171,6 +190,8 @@ const ultimaColunaAtiva = abaAtiva.getLastColumn();
 const colNomeAtiva = colNomeGeral;
 const colEmailAtiva = colEmailGeral;
 const colTelAtiva = colTelGeral;
+const colCidadeAtiva = colCidadeGerencial;
+const colEstadoAtiva = colEstadoGerencial;
 
 // Objeto que permite generalizar o código, passando a aba para o objeto, assim extraindo as variáveis respectivas da aba
 const objetoMap = new Map([
@@ -269,6 +290,8 @@ const objetoMap = new Map([
       colNome: colNomeAtiva,
       colEmail: colEmailAtiva,
       colTel: colTelAtiva,
+      colCidade: colCidadeAtiva,
+      colEstado: colEstadoAtiva,
     },
   ],
 ]);
@@ -329,4 +352,32 @@ function CompararSimilaridade(str1, str2) {
   else return 0;
 }
 
-const estados = ['Acre - AC', 'Alagoas - AL', 'Amapá - AP', 'Amazonas - AM', 'Bahia - BA', 'Ceará - CE', 'Distrito Federal - DF', 'Espírito Santo - ES', 'Goiás - GO', 'Maranhão - MA', 'Mato Grosso - MT', 'Mato Grosso do Sul - MS', 'Minas Gerais - MG', 'Pará - PA', 'Paraíba - PB', 'Paraná - PR', 'Pernambuco - PE', 'Piauí - PI', 'Rio de Janeiro - RJ', 'Rio Grande do Norte - RN', 'Rio Grande do Sul - RS', 'Rondônia - RO', 'Roraima - RR', 'Santa Catarina - SC', 'São Paulo - SP', 'Sergipe - SE', 'Tocantins - TO', 'Internacional'];
+const estados = [
+  'Acre - AC',
+  'Alagoas - AL',
+  'Amapá - AP',
+  'Amazonas - AM',
+  'Bahia - BA',
+  'Ceará - CE',
+  'Distrito Federal - DF',
+  'Espírito Santo - ES',
+  'Goiás - GO',
+  'Maranhão - MA',
+  'Mato Grosso - MT',
+  'Mato Grosso do Sul - MS',
+  'Minas Gerais - MG',
+  'Pará - PA',
+  'Paraíba - PB',
+  'Paraná - PR',
+  'Pernambuco - PE',
+  'Piauí - PI',
+  'Rio de Janeiro - RJ',
+  'Rio Grande do Norte - RN',
+  'Rio Grande do Sul - RS',
+  'Rondônia - RO',
+  'Roraima - RR',
+  'Santa Catarina - SC',
+  'São Paulo - SP',
+  'Sergipe - SE',
+  'Tocantins - TO',
+];
