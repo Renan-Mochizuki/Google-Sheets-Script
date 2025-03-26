@@ -38,7 +38,7 @@ function ValidarLoop(...args) {
   const nomeValido = args[0] && (typeof args[0] === 'string' ? !args[0].toLowerCase().includes('teste') : true);
   const emailValido = args[1] && (typeof args[1] === 'string' ? !args[1].toLowerCase().includes('teste') : true);
   const telefoneValido = args[2] && (typeof args[2] === 'string' ? !args[2].toLowerCase().includes('teste') : true);
-  
+
   // Retorna falso se qualquer um dos campos for inválido
   if (!nomeValido || !emailValido || !telefoneValido) return false;
 
@@ -173,7 +173,8 @@ function ImportarDados(abaDesejada) {
   for (let i = ultimaLinhaAnalisada; i <= ultimaLinha; i++) {
     // Armazendo a linha inteira da planilha desejada em uma array
     // Definimos o primeiro item como null para facilitar o acesso aos índices (sem precisar ficar subtraindo 1)
-    const valLinha = [null, ...abaDesejada.getRange(i, 1, 1, ultimaColuna).getValues()[0]];
+    const valLinha = abaDesejada.getRange(i, 1, 1, ultimaColuna).getValues()[0];
+    valLinha.unshift(null);
 
     const nome = valLinha[colNome];
     const email = valLinha[colEmail];
@@ -420,7 +421,8 @@ function ImportarNotas(abaDesejada, colDesejada) {
 
     // Se aquele email não for encontrado na planilha gerencial
     if (!linhaCampoGerencial) {
-      const valLinha = [null, ...abaDesejada.getRange(i + 2, 1, 1, ultimaColuna).getValues()[0]];
+      const valLinha = abaDesejada.getRange(i + 2, 1, 1, ultimaColuna).getValues()[0];
+      valLinha.unshift(null);
       LidarComPessoaNaoCadastrada(valLinha, i + 2, ultimaLinhaPlanilhaGerencial + 1, abaDesejada);
       ultimaLinhaPlanilhaGerencial++;
       continue;
@@ -509,7 +511,7 @@ function JuntarDados(dadosLinha1, dadosLinha2, primeiraColunaDoIntervalo) {
       // Caso não o texto do dado1 não possua similaridade com o dado2, adicione o dado2
       if (!possuiSimilaridade) {
         // Caso especial para o estado
-        if(colunaAtual === colEstadoGerencial){
+        if (colunaAtual === colEstadoGerencial) {
           dadosConcatenados.push(dado2.toString().trim());
           continue;
         }
@@ -576,7 +578,8 @@ function FazerBackupOriginais() {
   for (let i = 2; i < ultimaLinhaGerencial; i++) {
     // Armazendo a linha inteira da planilha gerencial em uma array
     // Definimos o primeiro item como null para facilitar o acesso aos índices (sem precisar ficar subtraindo 1)
-    const valLinha = [null, ...abaGerencial.getRange(i, 1, 1, ultimaColunaGerencial).getValues()[0]];
+    const valLinha = abaGerencial.getRange(i, 1, 1, ultimaColunaGerencial).getValues()[0];
+    valLinha.unshift(null);
 
     if (i % 100 === 0) planilhaAtiva.toast('Processo na linha ' + i + ' da planilha gerencial', Math.round((i / ultimaLinhaGerencial) * 100) + '% concluído da função atual', tempoNotificacao);
 

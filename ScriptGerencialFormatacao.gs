@@ -45,13 +45,15 @@ function CompletarVaziosComNao() {
   // Loop das colunas
   for (let j = 0; j < colunasDeSimNao.length; j++) {
     const coluna = colunasDeSimNao[j];
+    const valColuna = abaGerencial.getRange(2, coluna, ultimaLinhaGerencial, 1).getValues();
 
     // Loop das linhas
-    for (let i = 2; i <= ultimaLinhaGerencial; i++) {
-      const celula = abaGerencial.getRange(i, coluna);
-      const valor = celula.getValue();
-      if (!valor) celula.setValue('NÃO');
+    for (let i = 0; i < valColuna.length; i++) {
+      const valor = valColuna[i][0];
+      if (!valor) valColuna[i][0] = 'NÃO';
     }
+
+    abaGerencial.getRange(2, coluna, ultimaLinhaGerencial, 1).setValues(valColuna);
   }
 }
 
