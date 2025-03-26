@@ -150,22 +150,36 @@ function ProcessarEscolhasEsconderLinhas(escolhas) {
 
   // Loop que percorre todos valores da coluna
   for (let i = 0; i < ultimaLinhaGerencial; i++) {
-    if(escolhas.whats){
-      if(escolhas.whats == 'SIM'){
-        if(valWhats[i] != 'SIM'){
-          abaGerencial.hideRows(i + 2);
-        }
-      } else {
-        if(valWhats[i] == 'SIM'){
-          abaGerencial.hideRows(i + 2);
-        }
-      }
-    }
+    if(VerificarEsconder(escolha.whats, valWhats[i])) continue;
+
+if(VerificarEsconder(escolha.terminouCurso, valTerminouCurso[i])) continue;
+
+if(VerificarEsconder(escolha.linkTestado, valLinkTestado[i])) continue;
+
+if(VerificarEsconder(escolhas.comentarioEnviadoMapa, valComentarioEnviadoMapa[i])) continue;
+
+if(VerificarEsconder(escolhas.comentarioEnviadoMarcoFinal, valComentarioEnviadoMarcoFinal[i])) continue;
+
+
+    abaGerencial.hideRows(i + 2);
   }
 }
 
-// Função que esconde todas as linhas que possuem um certo valor em uma coluna
-function EsconderLinhas(colDesejada, valorAMostrar) {}
+function VerificarEsconder(escolha, valPlanilha){
+if(!escolha) return false;
+
+if(escolhas.whats == 'SIM'){
+        if(valWhats[i] == 'SIM'){
+          return true;
+        }
+      } else {
+        if(valWhats[i] != 'SIM'){
+          return true;
+        }
+      }
+
+return false;
+}
 
 // Função que revela todas as linhas escondidas
 function MostrarTodasLinhas() {
