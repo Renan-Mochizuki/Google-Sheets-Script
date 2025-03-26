@@ -5,6 +5,7 @@ function onOpen(e) {
     .addItem('📂 Importar Dados', 'Importar')
     .addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
     .addItem('🗑️ Limpar Planilha', 'LimparPlanilha')
+    .addItem('💾 SalvarDados', 'FazerBackupOriginais')
     .addItem('👁‍🗨 Mostrar todas linhas', 'MostrarTodasLinhas')
     .addItem('🔎 Filtrar visualização', 'MostrarInterfaceEsconderLinhas')
     .addSeparator()
@@ -593,31 +594,31 @@ function FazerBackupOriginais() {
 
     if (numLinhaInteresse) {
       const intervaloInserir = [valLinha[colWhatsGerencial], valLinha[colRespondeuMarcoZeroGerencial], valLinha[colSituacaoGerencial]];
-      if(intervaloInserir.every(item => !item)) continue;
+      if (intervaloInserir.every((item) => !item)) continue;
       abaInteresse.getRange(numLinhaInteresse, colWhatsInteresse, 1, 3).setValues([intervaloInserir]);
     }
 
     if (numLinhaMarcoZero) {
       const intervaloInserir = [valLinha[colRespondeuInteresseGerencial], valLinha[colWhatsGerencial]];
-      if(intervaloInserir.every(item => !item)) continue;
+      if (intervaloInserir.every((item) => !item)) continue;
       abaMarcoZero.getRange(numLinhaMarcoZero, colRespondeuInteresseMarcoZero, 1, 2).setValues([intervaloInserir]);
     }
 
     if (numLinhaEnvioMapa) {
       const intervaloInserir = [valLinha[colComentarioEnviadoMapaGerencial], valLinha[colPrazoEnvioMapaGerencial], valLinha[colMensagemVerificacaoMapaGerencial], valLinha[colTerminouCursoGerencial]];
-      if(intervaloInserir.every(item => !item)) continue;
+      if (intervaloInserir.every((item) => !item)) continue;
       abaEnvioMapa.getRange(numLinhaEnvioMapa, colComentarioEnviadoMapa, 1, 4).setValues([intervaloInserir]);
     }
 
     if (numLinhaMarcoFinal) {
       const intervaloInserir = FormatarCaixaBaixa([valLinha[colEnviouReflexaoMarcoFinalGerencial], valLinha[colPrazoEnvioMarcoFinalGerencial], valLinha[colComentarioEnviadoMarcoFinalGerencial]]);
-      if(intervaloInserir.every(item => !item)) continue;
+      if (intervaloInserir.every((item) => !item)) continue;
       abaEnvioMapa.getRange(numLinhaMarcoFinal, colEnviouReflexaoMarcoFinal, 1, 3).setValues([intervaloInserir]);
     }
 
     if (numLinhaCertificado) {
       const intervaloInserir = FormatarCaixaBaixa([valLinha[colLinkTestadoCertificadoGerencial], valLinha[colEntrouGrupoCertificadoGerencial]]);
-      if(intervaloInserir.every(item => !item)) continue;
+      if (intervaloInserir.every((item) => !item)) continue;
       abaCertificado.getRange(numLinhaCertificado, colLinkTestadoCertificado, 1, 2).setValues([intervaloInserir]);
     }
   }
