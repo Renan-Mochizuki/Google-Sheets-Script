@@ -581,6 +581,8 @@ function FazerBackupOriginais() {
     const valLinha = abaGerencial.getRange(i, 1, 1, ultimaColunaGerencial).getValues()[0];
     valLinha.unshift(null);
 
+    if (!ValidarLoop(valLinha[colNome], valLinha[colEmail], valLinha[colTel])) continue;
+
     if (i % 100 === 0) planilhaAtiva.toast('Processo na linha ' + i + ' da planilha gerencial', Math.round((i / ultimaLinhaGerencial) * 100) + '% concluído da função atual', tempoNotificacao);
 
     const numLinhaInteresse = ExtrairLinhaRedirect(valLinha[colRedirectInteresseGerencial]);
@@ -591,26 +593,31 @@ function FazerBackupOriginais() {
 
     if (numLinhaInteresse) {
       const intervaloInserir = [valLinha[colWhatsGerencial], valLinha[colRespondeuMarcoZeroGerencial], valLinha[colSituacaoGerencial]];
+      if(intervaloInserir.every(item => !item)) continue;
       abaInteresse.getRange(numLinhaInteresse, colWhatsInteresse, 1, 3).setValues([intervaloInserir]);
     }
 
     if (numLinhaMarcoZero) {
       const intervaloInserir = [valLinha[colRespondeuInteresseGerencial], valLinha[colWhatsGerencial]];
+      if(intervaloInserir.every(item => !item)) continue;
       abaMarcoZero.getRange(numLinhaMarcoZero, colRespondeuInteresseMarcoZero, 1, 2).setValues([intervaloInserir]);
     }
 
     if (numLinhaEnvioMapa) {
       const intervaloInserir = [valLinha[colComentarioEnviadoMapaGerencial], valLinha[colPrazoEnvioMapaGerencial], valLinha[colMensagemVerificacaoMapaGerencial], valLinha[colTerminouCursoGerencial]];
+      if(intervaloInserir.every(item => !item)) continue;
       abaEnvioMapa.getRange(numLinhaEnvioMapa, colComentarioEnviadoMapa, 1, 4).setValues([intervaloInserir]);
     }
 
     if (numLinhaMarcoFinal) {
-      const intervaloInserir = FormatarCaixaBaixa([valLinha[colEnviouReflexaoMarcoFinalGerencial], valLinha[colPrazoEnvioMarcoFinalGerencial]]);
-      abaEnvioMapa.getRange(numLinhaMarcoFinal, colEnviouReflexaoMarcoFinal, 1, 2).setValues([intervaloInserir]);
+      const intervaloInserir = FormatarCaixaBaixa([valLinha[colEnviouReflexaoMarcoFinalGerencial], valLinha[colPrazoEnvioMarcoFinalGerencial], valLinha[colComentarioEnviadoMarcoFinalGerencial]]);
+      if(intervaloInserir.every(item => !item)) continue;
+      abaEnvioMapa.getRange(numLinhaMarcoFinal, colEnviouReflexaoMarcoFinal, 1, 3).setValues([intervaloInserir]);
     }
 
     if (numLinhaCertificado) {
       const intervaloInserir = FormatarCaixaBaixa([valLinha[colLinkTestadoCertificadoGerencial], valLinha[colEntrouGrupoCertificadoGerencial]]);
+      if(intervaloInserir.every(item => !item)) continue;
       abaCertificado.getRange(numLinhaCertificado, colLinkTestadoCertificado, 1, 2).setValues([intervaloInserir]);
     }
   }
