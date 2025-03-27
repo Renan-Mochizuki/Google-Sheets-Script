@@ -5,6 +5,8 @@ node_modules
 package.json
 package-lock.json
 ScriptGerencialLinks.gs
+Links.js
+Links.gs
 Teste.js
 Teste2.js
 Testes.js

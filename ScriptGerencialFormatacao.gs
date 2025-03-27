@@ -40,12 +40,12 @@ function ApagarTodosDados() {
   }
 }
 
-// Função que completa campos vazios adicionais da planilha gerencial com NÃO
+// Função que completa campos vazios adicionais da planilha com NÃO
 function CompletarVaziosComNao() {
   // Loop das colunas
   for (let j = 0; j < colunasDeSimNao.length; j++) {
     const coluna = colunasDeSimNao[j];
-    const valColuna = abaGerencial.getRange(2, coluna, ultimaLinhaGerencial, 1).getValues();
+    const valColuna = abaAtiva.getRange(2, coluna, ultimaLinhaAtiva, 1).getValues();
 
     // Loop das linhas
     for (let i = 0; i < valColuna.length; i++) {
@@ -53,7 +53,7 @@ function CompletarVaziosComNao() {
       if (!valor) valColuna[i][0] = 'NÃO';
     }
 
-    abaGerencial.getRange(2, coluna, ultimaLinhaGerencial, 1).setValues(valColuna);
+    abaAtiva.getRange(2, coluna, ultimaLinhaAtiva, 1).setValues(valColuna);
   }
 }
 
@@ -176,58 +176,13 @@ function ContemUF(str, uf) {
   return regex.test(str);
 }
 
-// Função que exibe o HTML da interface com checkboxes para escolher quem quer esconder
+// Função que exibe o HTML da interface para escolher quem quer esconder
 function MostrarInterfaceEsconderLinhas() {
-  const html = HtmlService.createHtmlOutputFromFile('InterfaceCheckboxes').setWidth(400).setHeight(500);
+  const html = HtmlService.createHtmlOutputFromFile('Interface').setWidth(400).setHeight(500);
   SpreadsheetApp.getUi().showModalDialog(html, 'Escolha quem visualizar');
 }
 
-// Função que recebe as escolhas feitas na interface e esconde as linhas de acordo com elas
-function ProcessarEscolhasEsconderLinhas(escolhas) {
-  MostrarTodasLinhas();
-
-  // Pega todos os valores necessários de acordo com as escolhas feitas
-  const valores = {
-    situacao: escolhas.situacao ? abaGerencial.getRange(2, colSituacaoGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    whats: escolhas.whats ? abaGerencial.getRange(2, colWhatsGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    terminouCurso: escolhas.terminouCurso ? abaGerencial.getRange(2, colTerminouCursoGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    linkTestadoCertificado: escolhas.linkTestadoCertificado ? abaGerencial.getRange(2, colLinkTestadoCertificadoGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    linkCertificado: escolhas.linkTestadoCertificado ? abaGerencial.getRange(2, colLinkCertificadoGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    comentarioEnviadoMapa: escolhas.comentarioEnviadoMapa ? abaGerencial.getRange(2, colComentarioEnviadoMapaGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    linkMapa: escolhas.comentarioEnviadoMapa ? abaGerencial.getRange(2, colLinkMapaGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    comentarioEnviadoMarcoFinal: escolhas.comentarioEnviadoMarcoFinal ? abaGerencial.getRange(2, colComentarioEnviadoMarcoFinalGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-    respondeuMarcoFinal: escolhas.comentarioEnviadoMarcoFinal ? abaGerencial.getRange(2, colRespondeuMarcoFinalGerencial, ultimaLinhaGerencial, 1).getValues().flat() : null,
-  };
-
-  // Loop que percorre todas as linhas
-  for (let i = 0; i < ultimaLinhaGerencial; i++) {
-    let esconderLinha = false;
-
-    // Verifica cada condição
-    if (escolhas.situacao && VerificarEsconderSituacao(escolhas.situacao, valores.situacao[i])) {
-      esconderLinha = true;
-    }
-    if (escolhas.whats && VerificarEsconder(escolhas.whats, valores.whats[i])) {
-      esconderLinha = true;
-    }
-    if (escolhas.terminouCurso && VerificarEsconder(escolhas.terminouCurso, valores.terminouCurso[i])) {
-      esconderLinha = true;
-    }
-    if (escolhas.linkTestadoCertificado && (valores.linkCertificado[i] ? VerificarEsconder(escolhas.linkTestadoCertificado, valores.linkTestadoCertificado[i]) : true)) {
-      esconderLinha = true;
-    }
-    if (escolhas.comentarioEnviadoMapa && (valores.linkMapa[i] ? VerificarEsconder(escolhas.comentarioEnviadoMapa, valores.comentarioEnviadoMapa[i]) : true)) {
-      esconderLinha = true;
-    }
-    if (escolhas.comentarioEnviadoMarcoFinal && (valores.respondeuMarcoFinal[i] ? VerificarEsconder(escolhas.comentarioEnviadoMarcoFinal, valores.comentarioEnviadoMarcoFinal[i]) : true)) {
-      esconderLinha = true;
-    }
-
-    if (esconderLinha) {
-      abaGerencial.hideRows(i + 2);
-    }
-  }
-}
+// Função ProcessarEscolhasEsconderLinhas no script de cada arquivo
 
 // Função que verifica se a linha deve ser escondida ou não
 function VerificarEsconder(escolha, valor) {

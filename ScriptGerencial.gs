@@ -503,3 +503,50 @@ function FazerBackupOriginais() {
   }
   planilhaAtiva.toast('Fim da execução', 'Backup concluído', tempoNotificacao);
 }
+
+// Função que recebe as escolhas feitas na interface e esconde as linhas de acordo com elas
+function ProcessarEscolhasEsconderLinhas(escolhas) {
+  MostrarTodasLinhas();
+
+  // Pega todos os valores necessários de acordo com as escolhas feitas
+  const valores = {
+    situacao: escolhas.situacao ? abaAtiva.getRange(2, colSituacaoGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    whats: escolhas.whats ? abaAtiva.getRange(2, colWhatsGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    terminouCurso: escolhas.terminouCurso ? abaAtiva.getRange(2, colTerminouCursoGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    linkTestadoCertificado: escolhas.linkTestadoCertificado ? abaAtiva.getRange(2, colLinkTestadoCertificadoGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    linkCertificado: escolhas.linkTestadoCertificado ? abaAtiva.getRange(2, colLinkCertificadoGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    comentarioEnviadoMapa: escolhas.comentarioEnviadoMapa ? abaAtiva.getRange(2, colComentarioEnviadoMapaGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    linkMapa: escolhas.comentarioEnviadoMapa ? abaAtiva.getRange(2, colLinkMapaGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    comentarioEnviadoMarcoFinal: escolhas.comentarioEnviadoMarcoFinal ? abaAtiva.getRange(2, colComentarioEnviadoMarcoFinalGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+    respondeuMarcoFinal: escolhas.comentarioEnviadoMarcoFinal ? abaAtiva.getRange(2, colRespondeuMarcoFinalGerencial, ultimaLinhaAtiva, 1).getValues().flat() : null,
+  };;
+
+  // Loop que percorre todas as linhas
+  for (let i = 0; i < ultimaLinhaAtiva; i++) {
+    let esconderLinha = false;
+
+    // Verifica cada condição
+    if (escolhas.situacao && VerificarEsconderSituacao(escolhas.situacao, valores.situacao[i])) {
+      esconderLinha = true;
+    }
+    if (escolhas.whats && VerificarEsconder(escolhas.whats, valores.whats[i])) {
+      esconderLinha = true;
+    }
+    if (escolhas.terminouCurso && VerificarEsconder(escolhas.terminouCurso, valores.terminouCurso[i])) {
+      esconderLinha = true;
+    }
+    if (escolhas.linkTestadoCertificado && (valores.linkCertificado[i] ? VerificarEsconder(escolhas.linkTestadoCertificado, valores.linkTestadoCertificado[i]) : true)) {
+      esconderLinha = true;
+    }
+    if (escolhas.comentarioEnviadoMapa && (valores.linkMapa[i] ? VerificarEsconder(escolhas.comentarioEnviadoMapa, valores.comentarioEnviadoMapa[i]) : true)) {
+      esconderLinha = true;
+    }
+    if (escolhas.comentarioEnviadoMarcoFinal && (valores.respondeuMarcoFinal[i] ? VerificarEsconder(escolhas.comentarioEnviadoMarcoFinal, valores.comentarioEnviadoMarcoFinal[i]) : true)) {
+      esconderLinha = true;
+    }
+
+    if (esconderLinha) {
+      abaAtiva.hideRows(i + 2);
+    }
+  }
+}

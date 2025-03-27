@@ -10,7 +10,6 @@ function onOpen(e) {
       ui
         .createMenu('Formatação da planilha')
         .addItem('Formatar todos telefone', 'FormatarLinhasTelefone')
-        .addItem('Preencher campos estado', 'PreencherEstado')
         .addItem('Completar campos vazios com NÃO', 'CompletarVaziosComNao')
         .addItem('Remover linhas vazias', 'RemoverLinhasVazias')
     )
@@ -32,38 +31,6 @@ function SincronizarPlanilha() {
   // Sincronizar a situação entre Interesse e Gerencial
   SincronizarCampoPlanilhas(abaInteresse, colSituacaoInteresse, abaGerencial, colSituacaoGerencial);
   planilhaAtiva.toast('A planilha foi sincronizada', 'Finalização da execução', tempoNotificacao);
-}
-
-// Função que recebe as escolhas feitas na interface e esconde as linhas de acordo com elas
-function ProcessarEscolhasEsconderLinhas(escolhas) {
-  MostrarTodasLinhas();
-
-  // Pega todos os valores necessários de acordo com as escolhas feitas
-  const valores = {
-    situacao: escolhas.situacao ? abaAtiva.getRange(2, colSituacaoInteresse, ultimaLinhaAtiva, 1).getValues().flat() : null,
-    whats: escolhas.whats ? abaAtiva.getRange(2, colWhatsInteresse, ultimaLinhaAtiva, 1).getValues().flat() : null,
-    respondeuMarcoZero: escolhas.respondeuMarcoZero ? abaAtiva.getRange(2, colRespondeuMarcoZeroInteresse, ultimaLinhaAtiva, 1).getValues().flat() : null,
-  };
-
-  // Loop que percorre todas as linhas
-  for (let i = 0; i < ultimaLinhaAtiva; i++) {
-    let esconderLinha = false;
-
-    // Verifica cada condição
-    if (escolhas.situacao && VerificarEsconderSituacao(escolhas.situacao, valores.situacao[i])) {
-      esconderLinha = true;
-    }
-    if (escolhas.whats && VerificarEsconder(escolhas.whats, valores.whats[i])) {
-      esconderLinha = true;
-    }
-    if (escolhas.respondeuMarcoZero && VerificarEsconder(escolhas.respondeuMarcoZero, valores.respondeuMarcoZero[i])) {
-      esconderLinha = true;
-    }
-
-    if (esconderLinha) {
-      abaAtiva.hideRows(i + 2);
-    }
-  }
 }
 
 // Apenas declarando as funções para evitar erros de constants

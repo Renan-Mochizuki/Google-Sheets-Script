@@ -7,18 +7,18 @@
     <title>Interface de seleção de linhas</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-      body {
-        height: 450px;
-      }
       * {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
       }
+      body {
+        height: 450px;
+      }
       form {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         height: 100%;
       }
@@ -65,7 +65,8 @@
       #custom-toggle:focus {
         outline: none;
       }
-      input[type='button'], input[type='submit'] {
+      input[type='button'],
+      input[type='submit'] {
         cursor: pointer;
       }
       h4 {
@@ -84,7 +85,8 @@
         padding: 10px;
         box-sizing: border-box;
       }
-      .botoesBorda input[type='button'], .botoesBorda input[type='submit'] {
+      .botoesBorda input[type='button'],
+      .botoesBorda input[type='submit'] {
         font-size: 16px;
         color: white;
         border: none;
@@ -142,7 +144,7 @@
     </style>
 
     <script>
-      const ordemRadios = ['whats', 'terminouCurso', 'linkTestadoCertificado', 'comentarioEnviadoMapa', 'comentarioEnviadoMarcoFinal'];
+      const ordemRadios = ['whats', 'respondeuMarcoZero'];
       let value;
       function enviarEscolhas() {
         let escolhas = {};
@@ -213,31 +215,7 @@
           <span>Sim</span>
         </div>
 
-        <h4>Concluiu o curso?</h4>
-        <div class="wrapper">
-          <span>Não</span>
-          <input type="range" name="points" onchange="filterme(this.value, this);" min="1" step="1" id="custom-toggle" class="tgl-def" max="3" value="2" />
-          <span>Sim</span>
-        </div>
-
-        <h4>Link do certificado testado?</h4>
-        <p class="subtitle">Apenas para quem enviou o certificado</p>
-        <div class="wrapper">
-          <span>Não</span>
-          <input type="range" name="points" onchange="filterme(this.value, this);" min="1" step="1" id="custom-toggle" class="tgl-def" max="3" value="2" />
-          <span>Sim</span>
-        </div>
-
-        <h4>Comentários do mapa enviado?</h4>
-        <p class="subtitle">Apenas para quem enviou o mapa</p>
-        <div class="wrapper">
-          <span>Não</span>
-          <input type="range" name="points" onchange="filterme(this.value, this);" min="1" step="1" id="custom-toggle" class="tgl-def" max="3" value="2" />
-          <span>Sim</span>
-        </div>
-
-        <h4>Comentários do marco final enviado?</h4>
-        <p class="subtitle">Apenas para quem enviou o marco final</p>
+        <h4>Respondeu o marco zero?</h4>
         <div class="wrapper">
           <span>Não</span>
           <input type="range" name="points" onchange="filterme(this.value, this);" min="1" step="1" id="custom-toggle" class="tgl-def" max="3" value="2" />
