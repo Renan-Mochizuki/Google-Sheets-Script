@@ -4,8 +4,6 @@ function SincronizarCampoPlanilhas(abaDesejada1, colDesejada1, abaDesejada2, col
   const { ultimaLinha: ultimaLinha1, colNome: colNome1, nomePlanilha: nomePlanilha1 } = objetoMap.get(abaDesejada1);
   const { ultimaLinha: ultimaLinha2, colNome: colNome2, nomePlanilha: nomePlanilha2 } = objetoMap.get(abaDesejada2);
 
-  planilhaAtiva.toast('Verificando cadastro entre planilhas', 'Executando função', tempoNotificacao);
-
   // Pegando todos os emails da abaDesejada1 e abaDesejada2
   const nomesEmailsTelefones1 = abaDesejada1.getRange(2, colNome1, ultimaLinha1, 3).getValues();
   const nomesEmailsTelefones2 = abaDesejada2.getRange(2, colNome2, ultimaLinha2, 3).getValues();
