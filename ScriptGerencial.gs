@@ -3,7 +3,6 @@ const ui = SpreadsheetApp.getUi();
 function onOpen(e) {
   ui.createMenu('Menu de Funções')
     .addItem('📂 Importar Dados', 'Importar')
-    .addItem('📞 Sincronizar campos do Whatsapp', 'SincronizarWhatsGerencial')
     .addItem('🗑️ Limpar Planilha', 'LimparPlanilha')
     .addItem('💾 Salvar Dados', 'FazerBackupOriginais')
     .addItem('👁‍🗨 Mostrar todas linhas', 'MostrarTodasLinhas')
@@ -23,95 +22,6 @@ function onOpen(e) {
 
 // -- IMPORTANTE --
 // VEJA OS COMENTÁRIOS DO ARQUIVO CONSTANTS
-
-// Função que separa os dados pelo ;
-function SepararDados(dadosMultiplos) {
-  if (dadosMultiplos) {
-    return NormalizarString(dadosMultiplos).split(';');
-  } else {
-    return [dadosMultiplos];
-  }
-}
-
-// Função que verifica se os campos passados do loop atual são válidos args = (nome, email, telefone, outros...)
-function ValidarLoop(...args) {
-  // Se o valor existe, e caso for string, não contém a palavra 'teste'
-  const nomeValido = args[0] && (typeof args[0] === 'string' ? !args[0].toLowerCase().includes('teste') : true);
-  const emailValido = args[1] && (typeof args[1] === 'string' ? !args[1].toLowerCase().includes('teste') : true);
-  const telefoneValido = args[2] && (typeof args[2] === 'string' ? !args[2].toLowerCase().includes('teste') : true);
-
-  // Retorna falso se qualquer um dos campos for inválido
-  if (!nomeValido || !emailValido || !telefoneValido) return false;
-
-  // Se outro parametro foi passado, verifique se qualquer um for nulo, retorne falso
-  for (let i = 3; i < args.length; i++) {
-    if (!args[i]) return false;
-  }
-
-  return true;
-}
-
-// Função que verificará se o email existe na planilha desejada e retornará a linha
-function RetornarLinhaDados(nomeProcurado, emailProcurado, telefoneProcurado, dados) {
-  // Separando os dados procurados pois ele pode ser um valor com mais de um email
-  const nomesProcurados = SepararDados(nomeProcurado);
-  const emailsProcurados = SepararDados(emailProcurado);
-  const telefonesProcurados = SepararDados(telefoneProcurado);
-
-  // dados é uma matriz, na qual possui as colunas nome, email, telefone e cada linha é um cadastro
-
-  // Conferir cada linha da matriz dos dados
-  for (let i = 0; i < dados.length; i++) {
-    const nomeDados = dados[i][0];
-    const emailDados = dados[i][1];
-    const telefoneDados = dados[i][2];
-
-    const similaridadeNome = VerificarLinhaDados(nomeDados, nomesProcurados);
-    const similaridadeEmail = VerificarLinhaDados(emailDados, emailsProcurados);
-    const similaridadeTelefone = VerificarLinhaDados(telefoneDados, telefonesProcurados);
-
-    // Se (email e telefone forem iguais) ou (email e nome forem iguais, tendo que o telefone não é caso especial) ou (telefone e nome forem iguais)
-    if (
-      (similaridadeEmail >= 0.8 && similaridadeTelefone >= 0.8) ||
-      (similaridadeEmail >= 0.8 && similaridadeNome >= 0.5 && similaridadeTelefone !== -1) ||
-      (similaridadeTelefone >= 0.9 && similaridadeNome >= 0.6)
-    ) {
-      return i + 2; // Retorne o índice da array + 2 (Porque a array começa em 0 e a planilha em 2)
-    }
-  }
-  // Se não for encontrado nenhum
-  return false;
-}
-
-// Função genérica para verificar se os dados são iguais (com uma certa tolerância)
-function VerificarLinhaDados(dados, valoresProcurados) {
-  if (!dados) return false;
-
-  for (let dadoPlanilha of dados.toString().split(';')) {
-    // Se o dado passado for um email, retire o domínio (Exemplo: @gmail.com)
-    if (dadoPlanilha.includes('@')) {
-      dadoPlanilha = dadoPlanilha.split('@')[0];
-    }
-
-    for (let valorProcurado of valoresProcurados) {
-      // Se o valor procurado for um email, retire o domínio (Exemplo: @gmail.com)
-      if (valorProcurado.includes('@')) {
-        valorProcurado = valorProcurado.split('@')[0];
-      }
-      const similaridade = CompararSimilaridade(valorProcurado, dadoPlanilha);
-
-      // Caso especifico com telefone (pois foi achado um dado que falhava na verificação comum)
-      // O telefone procurado é diferente e o um telefone apenas possui o +
-      if (similaridade < 0.8 && valorProcurado.includes('+') != dadoPlanilha.includes('+')) {
-        return -1;
-      }
-
-      // Se o valor procurado e o dado bruto forem iguais, retorne true
-      return similaridade;
-    }
-  }
-  return false;
-}
 
 // Função que executa outras funções para importar os dados de cada planilha
 function Importar() {
@@ -525,38 +435,6 @@ function JuntarDados(dadosLinha1, dadosLinha2, primeiraColunaDoIntervalo) {
   }
 
   return dadosConcatenados;
-}
-
-// Função que retorna a turma mais recente (Ex: T04-2024 > T01-2024 > T02-2023)
-function RetornarTurmaMaisRecente(string1, string2) {
-  // Se uma string não existir, ou for 'ESPERA', retorne a outra
-  if (!string1 || string1 === 'ESPERA') return string2;
-  if (!string2 || string2 === 'ESPERA') return string1;
-
-  // Separar os números antes do traço (T01-2024 => 01; 2024)
-  const regex = /(\d+)-(\d+)/;
-  const match1 = string1.match(regex);
-  const match2 = string2.match(regex);
-
-  if (!match1 || !match2) return string1;
-
-  // Verificar qual ano é maior
-  if (match1[2] > match2[2]) return string1;
-  if (match1[2] < match2[2]) return string2;
-
-  // Anos iguais, verificar qual turma é maior
-  if (match1[1] > match2[1]) return string1;
-  if (match1[1] < match2[1]) return string2;
-
-  return string1;
-}
-
-// Função que compara dois valores de SIM ou NÃO e retorna o valor correto (priorizando o SIM)
-function RetornarValorSimNao(valor1, valor2) {
-  if (!valor1) return valor2;
-  if (!valor2) return valor1;
-  if (valor1 == 'SIM' || valor2 == 'SIM') return 'SIM';
-  return valor1;
 }
 
 // Função que extrai a linha de uma url de redirect

@@ -22,22 +22,22 @@ function LimparPlanilha() {
 }
 
 // Função que apaga toda a planilha sem realizar backup
-function ApagarTodosDados(){
-    // Janela de diálogo de confirmação da ação
-    const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os dados? \n Todos os dados dessa planilha serão apagados e não serão salvos', ui.ButtonSet.YES_NO);
+function ApagarTodosDados() {
+  // Janela de diálogo de confirmação da ação
+  const response = ui.alert('Confirmação', 'Você tem certeza que deseja excluir todos os dados? \n Todos os dados dessa planilha serão apagados e não serão salvos', ui.ButtonSet.YES_NO);
 
-    if (response == ui.Button.YES) {
-      // Verifica se há mais de uma linha para limpar
-      if (ultimaLinhaAtiva <= 1) return;
+  if (response == ui.Button.YES) {
+    // Verifica se há mais de uma linha para limpar
+    if (ultimaLinhaAtiva <= 1) return;
 
-      // Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
-      const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
-  
-      // Limpa o conteúdo do intervalo selecionado
-      planilha.clearContent();
-      planilha.setBackground('#ffffff');
-      planilha.clearNote();
-    }
+    // Define o intervalo que vai da segunda linha até a última linha e a última coluna com conteúdo
+    const planilha = abaAtiva.getRange(2, 1, ultimaLinhaAtiva - 1, ultimaColunaAtiva);
+
+    // Limpa o conteúdo do intervalo selecionado
+    planilha.clearContent();
+    planilha.setBackground('#ffffff');
+    planilha.clearNote();
+  }
 }
 
 // Função que completa campos vazios adicionais da planilha gerencial com NÃO
@@ -155,14 +155,14 @@ function PreencherEstado() {
 
     estados.forEach((estadoCompleto) => {
       const partes = estadoCompleto.split(' - ');
-      for(let cidadeSeparada of cidade.split(';')){
+      for (let cidadeSeparada of cidade.split(';')) {
         if (cidadeSeparada.trim() === partes[0] || ContemUF(cidadeSeparada, partes[1])) {
           cidadesEstados[i][1] = estadoCompleto;
         }
       }
     });
   }
-  
+
   abaAtiva.getRange(2, colCidade, ultimaLinhaAtiva, 2).setValues(cidadesEstados);
 }
 
