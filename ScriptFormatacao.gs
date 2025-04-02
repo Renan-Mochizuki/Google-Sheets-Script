@@ -186,8 +186,11 @@ function MostrarInterfaceEsconderLinhas() {
 
 // Função que verifica se a linha deve ser escondida ou não
 function VerificarEsconder(escolha, valor) {
-  if (!escolha) return false;
-  return !((escolha === 'SIM' && valor === 'SIM') || (escolha === 'NÃO' && valor !== 'SIM'));
+  if (typeof escolha !== 'string' || typeof valor !== 'string') return false;
+  escolha = escolha.toLowerCase();
+  valor = valor.toLowerCase();
+  
+  return !((escolha === 'sim' && valor === 'sim') || (escolha === 'não' && valor !== 'sim'));
 }
 
 // Função que verifica se a linha da situação deve ser escondida ou não

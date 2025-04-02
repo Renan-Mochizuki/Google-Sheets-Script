@@ -66,6 +66,7 @@ const colTextoMapa = Coluna('J');
 const colComentarioEnviadoMapa = Coluna('K');
 const colPrazoEnvioMapa = Coluna('L');
 const colMensagemVerificacaoMapa = Coluna('M');
+const colTerminouCursoMapa = Coluna('N');
 
 // Colunas planilha Marco Final
 const colNomeMarcoFinal = colNomeGeral;
